@@ -26,7 +26,7 @@
     return accumulator;
   }, Object.create(null));
   const STORAGE_KEY = 'yams-scorekeeper-v1';
-  const DEFAULT_TRACKS = ['Montée', 'Descente', 'Hasard', 'Premier'];
+  const DEFAULT_TRACKS = ['Descente', 'Montée', 'Hasard', 'Premier'];
 
   const storageAvailable = (() => {
     try {
@@ -281,7 +281,7 @@
 
   function createEmptyState(mode) {
     const message = mode === 'multipiste'
-      ? 'Ajoutez vos pistes (Montée, Descente, Hasard, Premier) pour commencer.'
+      ? 'Ajoutez vos pistes (Descente, Montée, Hasard, Premier) pour commencer.'
       : 'Ajoutez vos joueurs pour lancer la partie.';
     const wrapper = document.createElement('div');
     wrapper.className = 'empty-state';
@@ -304,7 +304,7 @@
     const categoryHeader = document.createElement('th');
     categoryHeader.scope = 'col';
     categoryHeader.className = 'category-header';
-    categoryHeader.textContent = 'Catégorie';
+    // categoryHeader.textContent = 'Catégorie';
     headerRow.appendChild(categoryHeader);
 
     boards.forEach((board) => {
@@ -316,7 +316,7 @@
 
     const tbody = document.createElement('tbody');
 
-    tbody.appendChild(createSectionRow('Section supérieure', boards.length + 1));
+    // tbody.appendChild(createSectionRow('Section supérieure', boards.length + 1));
     UPPER_CATEGORIES.forEach((category) => {
       tbody.appendChild(createCategoryDataRow(category, boards));
     });
@@ -324,7 +324,7 @@
     tbody.appendChild(createTotalsDataRow('Bonus (≥ 63)', 'bonus', boards, totalsByBoard, true));
     tbody.appendChild(createTotalsDataRow('Total supérieur', 'upperWithBonus', boards, totalsByBoard));
 
-    tbody.appendChild(createSectionRow('Section inférieure', boards.length + 1));
+    // tbody.appendChild(createSectionRow('Section inférieure', boards.length + 1));
     LOWER_CATEGORIES.forEach((category) => {
       tbody.appendChild(createCategoryDataRow(category, boards));
     });
@@ -354,12 +354,12 @@
     initials.title = board.name;
     block.appendChild(initials);
 
-    const fullName = document.createElement('span');
-    fullName.className = 'board-full-name';
-    fullName.dataset.boardId = board.id;
-    fullName.dataset.boardLabel = 'name';
-    fullName.textContent = board.name;
-    block.appendChild(fullName);
+    // const fullName = document.createElement('span');
+    // fullName.className = 'board-full-name';
+    // fullName.dataset.boardId = board.id;
+    // fullName.dataset.boardLabel = 'name';
+    // fullName.textContent = board.name;
+    // block.appendChild(fullName);
 
     th.appendChild(block);
     return th;
