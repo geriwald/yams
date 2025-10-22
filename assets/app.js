@@ -1,6 +1,8 @@
 (() => {
   'use strict';
 
+  const APP_VERSION = 'v2.2-debug';
+
   const UPPER_CATEGORIES = [
     { id: 'ones', label: 'As', hint: 'Total des dés à 1', number: 1 },
     { id: 'twos', label: 'Deux', hint: 'Total des dés à 2', number: 2 },
@@ -50,6 +52,8 @@
   const restoreTracksButton = document.querySelector('#restore-default-tracks');
   const controlsPanel = document.querySelector('#controls-panel');
   const toggleControlsButton = document.querySelector('#toggle-controls');
+
+  console.log(`Yams Scorekeeper ${APP_VERSION}`);
 
   let state = loadState() ?? createDefaultState();
   let isCrossMode = false;
@@ -301,64 +305,106 @@
 
   // Header buttons
   document.addEventListener('click', (event) => {
-    const btn = event.target.closest('.header-btn, .editor-btn');
-    if (!btn) {
-      // Masquer le sous-menu si on clique ailleurs
-      const editor = document.getElementById('column-editor');
-      if (!editor.hasAttribute('hidden')) {
-        editor.setAttribute('hidden', '');
-      }
+    const target = event.target;
+    console.log('[DEBUG] Click event:', { target: target.tagName, classes: target.className });
+    
+    if (!(target instanceof HTMLElement)) {
+      console.log('[DEBUG] Target is not an HTMLElement');
       return;
     }
-    const action = btn.dataset.action;
+
+    const btn = target.closest('.header-btn, .editor-btn');
     const editor = document.getElementById('column-editor');
-    if (action === 'delete-tracks') {
-      editor.setAttribute('hidden', '');
-      if (confirm('Supprimer toutes les pistes ?')) {
-        state.boards.multipiste = [];
-        saveState();
-        render();
-      }
-    } else if (action === 'reset-scores') {
-      if (confirm('Vider toutes les grilles ?')) {
-        for (const collection of Object.values(state.boards)) {
-          collection.forEach(resetBoardEntries);
+    
+    console.log('[DEBUG] Button found:', btn ? btn.dataset.action : 'none');
+    console.log('[DEBUG] Editor state:', editor ? (editor.hasAttribute('hidden') ? 'hidden' : 'visible') : 'not found');
+
+    // Si on clique sur un bouton avec une action
+    if (btn && btn.dataset.action) {
+      const action = btn.dataset.action;
+      console.log('[DEBUG] Action triggered:', action);
+
+      if (action === 'delete-tracks') {
+        console.log('[DEBUG] Executing delete-tracks');
+        editor.setAttribute('hidden', '');
+        if (confirm('Supprimer toutes les pistes ?')) {
+          state.boards.multipiste = [];
+          saveState();
+          render();
         }
+        return;
+      }
+
+      if (action === 'reset-scores') {
+        console.log('[DEBUG] Executing reset-scores');
+        editor.setAttribute('hidden', '');
+        if (confirm('Vider toutes les grilles ?')) {
+          for (const collection of Object.values(state.boards)) {
+            collection.forEach(resetBoardEntries);
+          }
+          saveState();
+          renderBoards();
+        }
+        return;
+      }
+
+      if (action === 'add-track') {
+        console.log('[DEBUG] Executing add-track');
+        editor.setAttribute('hidden', '');
+        state.boards.multipiste.push(createBoard(`J${state.boards.multipiste.length + 1}`, 'multipiste'));
         saveState();
         renderBoards();
+        return;
       }
-    } else if (action === 'add-track') {
-      editor.setAttribute('hidden', '');
-      state.boards.multipiste.push(createBoard(`J${state.boards.multipiste.length + 1}`, 'multipiste'));
-      saveState();
-      renderBoards();
-    } else if (action === 'add-three-tracks') {
-      editor.setAttribute('hidden', '');
-      if (confirm('Cela supprimera toutes les pistes actuelles et ajoutera les trois pistes classiques. Continuer ?')) {
-        state.boards.multipiste = ['Montée', 'Descente', 'Libre'].map((name) => createBoard(name, 'multipiste'));
-        saveState();
-        render();
-      }
-    } else if (action === 'add-four-tracks') {
-      editor.setAttribute('hidden', '');
-      if (confirm('Cela supprimera toutes les pistes actuelles et ajoutera les quatre pistes classiques. Continuer ?')) {
-        state.boards.multipiste = ['Montée', 'Descente', 'Libre', 'Premier'].map((name) => createBoard(name, 'multipiste'));
-        saveState();
-        render();
-      }
-    } else if (action === 'toggle-cross-mode') {
-      isCrossMode = !isCrossMode;
-      const btn = event.target.closest('.header-btn');
-      btn.classList.toggle('active', isCrossMode);
-    } else if (action === 'edit-columns') {
-      const isHidden = editor.hasAttribute('hidden');
-      if (isHidden) {
-        editor.removeAttribute('hidden');
-      } else {
+
+      if (action === 'add-three-tracks') {
+        console.log('[DEBUG] Executing add-three-tracks');
         editor.setAttribute('hidden', '');
+        if (confirm('Cela supprimera toutes les pistes actuelles et ajoutera les trois pistes classiques. Continuer ?')) {
+          state.boards.multipiste = ['Montée', 'Descente', 'Libre'].map((name) => createBoard(name, 'multipiste'));
+          saveState();
+          render();
+        }
+        return;
       }
-      // Empêcher la propagation pour ne pas masquer immédiatement
-      event.stopPropagation();
+
+      if (action === 'add-four-tracks') {
+        console.log('[DEBUG] Executing add-four-tracks');
+        editor.setAttribute('hidden', '');
+        if (confirm('Cela supprimera toutes les pistes actuelles et ajoutera les quatre pistes classiques. Continuer ?')) {
+          state.boards.multipiste = ['Montée', 'Descente', 'Libre', 'Premier'].map((name) => createBoard(name, 'multipiste'));
+          saveState();
+          render();
+        }
+        return;
+      }
+
+      if (action === 'toggle-cross-mode') {
+        console.log('[DEBUG] Executing toggle-cross-mode');
+        isCrossMode = !isCrossMode;
+        btn.classList.toggle('active', isCrossMode);
+        return;
+      }
+
+      if (action === 'edit-columns') {
+        console.log('[DEBUG] Executing edit-columns');
+        const isHidden = editor.hasAttribute('hidden');
+        console.log('[DEBUG] Editor was:', isHidden ? 'hidden' : 'visible');
+        if (isHidden) {
+          editor.removeAttribute('hidden');
+          console.log('[DEBUG] Editor now visible');
+        } else {
+          editor.setAttribute('hidden', '');
+          console.log('[DEBUG] Editor now hidden');
+        }
+        return;
+      }
+    }
+
+    // Si on clique ailleurs (pas sur un bouton), fermer l'éditeur si ouvert
+    const clickedInEditor = target.closest('#column-editor');
+    if (!clickedInEditor && !editor.hasAttribute('hidden')) {
+      editor.setAttribute('hidden', '');
     }
   });
 

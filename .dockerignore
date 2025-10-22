@@ -1,0 +1,6 @@
+Dockerfile
+*.sh
+docker-compose.yml
+yams.tar
+.git
+README.md
