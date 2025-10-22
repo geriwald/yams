@@ -26,7 +26,7 @@
     return accumulator;
   }, Object.create(null));
   const STORAGE_KEY = 'yams-scorekeeper-v1';
-  const DEFAULT_TRACKS = ['Descente', 'Montée', 'Hasard', 'Premier'];
+  const DEFAULT_TRACKS = ['Montée', 'Descente', 'Libre', 'Premier'];
 
   const storageAvailable = (() => {
     try {
@@ -281,7 +281,7 @@
         renderBoards();
       }
     } else if (action === 'add-track') {
-      state.boards.multipiste.push(createBoard(`P${state.boards.multipiste.length + 1}`, 'multipiste'));
+      state.boards.multipiste.push(createBoard(`J${state.boards.multipiste.length + 1}`, 'multipiste'));
       saveState();
       renderBoards();
     } else if (action === 'add-classic') {
@@ -313,9 +313,7 @@
   }
 
   function createEmptyState(mode) {
-    const message = mode === 'multipiste'
-      ? 'Ajoutez vos pistes (Descente, Montée, Hasard, Premier) pour commencer.'
-      : 'Ajoutez vos joueurs pour lancer la partie.';
+    const message = 'Ajoutez vos pistes pour commencer.'
     const wrapper = document.createElement('div');
     wrapper.className = 'empty-state';
     wrapper.textContent = message;
@@ -395,14 +393,14 @@
         renderBoards();
       }
     });
-    block.appendChild(initials);
+    // block.appendChild(initials);
 
-    // const fullName = document.createElement('span');
-    // fullName.className = 'board-full-name';
-    // fullName.dataset.boardId = board.id;
-    // fullName.dataset.boardLabel = 'name';
-    // fullName.textContent = board.name;
-    // block.appendChild(fullName);
+    const fullName = document.createElement('span');
+    fullName.className = 'board-full-name';
+    fullName.dataset.boardId = board.id;
+    fullName.dataset.boardLabel = 'name';
+    fullName.textContent = board.name;
+    block.appendChild(fullName);
 
     th.appendChild(block);
     return th;
