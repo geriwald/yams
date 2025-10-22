@@ -337,7 +337,6 @@
 
       if (action === 'reset-scores') {
         console.log('[DEBUG] Executing reset-scores');
-        editor.setAttribute('hidden', '');
         if (confirm('Vider toutes les grilles ?')) {
           for (const collection of Object.values(state.boards)) {
             collection.forEach(resetBoardEntries);
