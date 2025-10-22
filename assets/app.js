@@ -155,7 +155,7 @@
     }
 
     const crossedMap = context.board.crossed ?? (context.board.crossed = createEmptyMarks());
-    crossedMap[categoryId] = false;
+    crossedMap[categoryId] = false; // Keep for compatibility, but mechanism removed
     const cell = input.closest('.score-cell');
     if (cell) {
       cell.classList.remove('score-cell-crossed');
@@ -193,38 +193,7 @@
   boardsContainer.addEventListener('click', (event) => {
     const button = event.target instanceof HTMLElement ? event.target.closest('[data-action]') : null;
     if (!button) {
-      const targetElement = event.target instanceof HTMLElement ? event.target : null;
-      if (!targetElement) {
-        return;
-      }
-      const cell = targetElement.closest('.score-cell');
-      if (!cell) {
-        return;
-      }
-      if (targetElement.closest('.score-input') || targetElement.closest('.score-fixed-toggle')) {
-        return;
-      }
-      const boardId = cell.dataset.boardId;
-      const boardType = cell.dataset.boardType ?? state.mode;
-      const categoryId = cell.dataset.categoryId;
-      if (!boardId || !boardType || !categoryId) {
-        return;
-      }
-      const context = getBoardContext(boardId, boardType);
-      if (!context) {
-        return;
-      }
-      const crossedMap = context.board.crossed ?? (context.board.crossed = createEmptyMarks());
-      const currentlyCrossed = Boolean(crossedMap[categoryId]);
-      if (currentlyCrossed) {
-        crossedMap[categoryId] = false;
-        context.board.entries[categoryId] = null;
-      } else {
-        crossedMap[categoryId] = true;
-        context.board.entries[categoryId] = 0;
-      }
-      saveState();
-      renderBoards();
+      // Removed crossing mechanism
       return;
     }
     const boardId = button.dataset.boardId;
@@ -249,8 +218,8 @@
       if (!category || typeof category.fixedScore !== 'number') {
         return;
       }
-      const isActive = !context.board.crossed?.[categoryId] && context.board.entries[categoryId] === category.fixedScore;
-      context.board.crossed[categoryId] = false;
+      const isActive = context.board.entries[categoryId] === category.fixedScore; // Removed crossed check
+      // context.board.crossed[categoryId] = false; // Removed
       context.board.entries[categoryId] = isActive ? null : category.fixedScore;
       saveState();
       renderBoards();
@@ -412,10 +381,10 @@
     cell.dataset.categoryId = category.id;
     const isFixed = typeof category.fixedScore === 'number';
     const crossedMap = board.crossed ?? (board.crossed = createEmptyMarks());
-    const isCrossed = Boolean(crossedMap[category.id]);
-    if (isCrossed) {
-      cell.classList.add('score-cell-crossed');
-    }
+    const isCrossed = false; // Mechanism removed
+    // if (isCrossed) {
+    //   cell.classList.add('score-cell-crossed');
+    // }
 
     const value = board.entries[category.id];
     const container = document.createElement('div');
@@ -429,15 +398,15 @@
       toggle.dataset.boardId = board.id;
       toggle.dataset.boardType = board.type;
       toggle.dataset.categoryId = category.id;
-      const isActive = !isCrossed && value === category.fixedScore;
-      toggle.textContent = isActive ? String(category.fixedScore) : ' ';
+      const isActive = value === category.fixedScore; // Removed crossed check
+      toggle.textContent = isActive ? String(category.fixedScore) : '';
       toggle.setAttribute('aria-pressed', isActive ? 'true' : 'false');
       if (isActive) {
         toggle.classList.add('active');
       }
-      if (isCrossed) {
-        toggle.disabled = true;
-      }
+      // if (isCrossed) {
+      //   toggle.disabled = true;
+      // }
       container.appendChild(toggle);
     } else {
       const input = document.createElement('input');
@@ -451,11 +420,12 @@
       input.dataset.boardId = board.id;
       input.dataset.boardType = board.type;
       input.dataset.categoryId = category.id;
-      if (isCrossed) {
-        input.disabled = true;
-        input.value = '';
-        input.classList.add('score-input-crossed');
-      }
+      // Removed crossed logic
+      // if (isCrossed) {
+      //   input.disabled = true;
+      //   input.value = '';
+      //   input.classList.add('score-input-crossed');
+      // }
       container.appendChild(input);
     }
 
@@ -523,9 +493,10 @@
   function resetBoardEntries(board) {
     ALL_CATEGORIES.forEach((category) => {
       board.entries[category.id] = null;
-      if (board.crossed) {
-        board.crossed[category.id] = false;
-      }
+      // Removed crossed reset
+      // if (board.crossed) {
+      //   board.crossed[category.id] = false;
+      // }
     });
   }
 
@@ -671,11 +642,12 @@
     ALL_CATEGORIES.forEach((category) => {
       const value = sourceEntries[category.id];
       const numeric = Number(value);
-      if (sourceCrossed[category.id]) {
-        sanitized.entries[category.id] = 0;
-        sanitized.crossed[category.id] = true;
-        return;
-      }
+      // Removed crossed logic
+      // if (sourceCrossed[category.id]) {
+      //   sanitized.entries[category.id] = 0;
+      //   sanitized.crossed[category.id] = true;
+      //   return;
+      // }
       sanitized.entries[category.id] = Number.isFinite(numeric) && numeric >= 0 ? Math.min(999, Math.round(numeric)) : null;
     });
     return sanitized;
