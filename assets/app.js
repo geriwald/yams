@@ -301,17 +301,26 @@
 
   // Header buttons
   document.addEventListener('click', (event) => {
-    const btn = event.target.closest('.header-btn');
-    if (!btn) return;
+    const btn = event.target.closest('.header-btn, .editor-btn');
+    if (!btn) {
+      // Masquer le sous-menu si on clique ailleurs
+      const editor = document.getElementById('column-editor');
+      if (!editor.hasAttribute('hidden')) {
+        editor.setAttribute('hidden', '');
+      }
+      return;
+    }
     const action = btn.dataset.action;
+    const editor = document.getElementById('column-editor');
     if (action === 'delete-tracks') {
+      editor.setAttribute('hidden', '');
       if (confirm('Supprimer toutes les pistes ?')) {
         state.boards.multipiste = [];
         saveState();
         render();
       }
     } else if (action === 'reset-scores') {
-      if (confirm('Réinitialiser tous les scores ?')) {
+      if (confirm('Vider toutes les grilles ?')) {
         for (const collection of Object.values(state.boards)) {
           collection.forEach(resetBoardEntries);
         }
@@ -319,17 +328,37 @@
         renderBoards();
       }
     } else if (action === 'add-track') {
+      editor.setAttribute('hidden', '');
       state.boards.multipiste.push(createBoard(`J${state.boards.multipiste.length + 1}`, 'multipiste'));
       saveState();
       renderBoards();
-    } else if (action === 'add-classic') {
-      state.boards.multipiste = DEFAULT_TRACKS.map((name) => createBoard(name, 'multipiste'));
-      saveState();
-      render();
+    } else if (action === 'add-three-tracks') {
+      editor.setAttribute('hidden', '');
+      if (confirm('Cela supprimera toutes les pistes actuelles et ajoutera les trois pistes classiques. Continuer ?')) {
+        state.boards.multipiste = ['Montée', 'Descente', 'Libre'].map((name) => createBoard(name, 'multipiste'));
+        saveState();
+        render();
+      }
+    } else if (action === 'add-four-tracks') {
+      editor.setAttribute('hidden', '');
+      if (confirm('Cela supprimera toutes les pistes actuelles et ajoutera les quatre pistes classiques. Continuer ?')) {
+        state.boards.multipiste = ['Montée', 'Descente', 'Libre', 'Premier'].map((name) => createBoard(name, 'multipiste'));
+        saveState();
+        render();
+      }
     } else if (action === 'toggle-cross-mode') {
       isCrossMode = !isCrossMode;
       const btn = event.target.closest('.header-btn');
       btn.classList.toggle('active', isCrossMode);
+    } else if (action === 'edit-columns') {
+      const isHidden = editor.hasAttribute('hidden');
+      if (isHidden) {
+        editor.removeAttribute('hidden');
+      } else {
+        editor.setAttribute('hidden', '');
+      }
+      // Empêcher la propagation pour ne pas masquer immédiatement
+      event.stopPropagation();
     }
   });
 
@@ -442,6 +471,15 @@
     fullName.dataset.boardId = board.id;
     fullName.dataset.boardLabel = 'name';
     fullName.textContent = board.name;
+    fullName.style.cursor = 'pointer';
+    fullName.addEventListener('click', () => {
+      const newName = prompt('Nouveau nom:', board.name);
+      if (newName && newName.trim()) {
+        board.name = newName.trim();
+        saveState();
+        renderBoards();
+      }
+    });
     block.appendChild(fullName);
 
     th.appendChild(block);

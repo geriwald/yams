@@ -10,11 +10,15 @@
     <header class="app-header">
       <h1>Compteur Yams</h1>
       <div class="header-buttons">
-        <button type="button" class="header-btn" data-action="reset-scores" title="Réinitialiser les scores">🔄</button>
-        <button type="button" class="header-btn" data-action="delete-tracks" title="Supprimer les pistes">🗑️</button>
-        <button type="button" class="header-btn" data-action="add-track" title="Ajouter une piste">➕</button>
-        <button type="button" class="header-btn" data-action="add-classic" title="Ajouter les pistes classiques">🎯</button>
-        <button type="button" class="header-btn" data-action="toggle-cross-mode" title="Mode biffure">✖️</button>
+        <button type="button" class="header-btn" data-action="reset-scores" title="Vider la grille">Vider</button>
+        <button type="button" class="header-btn" data-action="toggle-cross-mode" title="Biffer une case">Biffer</button>
+        <button type="button" class="header-btn" data-action="edit-columns" title="Éditer les colonnes">Pistes</button>
+      </div>
+      <div class="column-editor" id="column-editor" hidden>
+        <button type="button" class="editor-btn" data-action="delete-tracks">Supprimer les pistes</button>
+        <button type="button" class="editor-btn" data-action="add-track">Ajouter un joueur</button>
+        <button type="button" class="editor-btn" data-action="add-three-tracks">Yams trois pistes</button>
+        <button type="button" class="editor-btn" data-action="add-four-tracks">Yams quatre pistes</button>
       </div>
    
     </header>
