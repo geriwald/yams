@@ -9,9 +9,13 @@
   <body>
     <header class="app-header">
       <h1>Compteur Yams</h1>
-      <button type="button" class="button ghost" id="toggle-controls" aria-expanded="false" aria-controls="controls-panel">
-        Options
-      </button>
+      <div class="header-buttons">
+        <button type="button" class="header-btn" data-action="delete-tracks" title="Supprimer les pistes">🗑️</button>
+        <button type="button" class="header-btn" data-action="reset-scores" title="Réinitialiser les scores">🔄</button>
+        <button type="button" class="header-btn" data-action="add-track" title="Ajouter une piste">➕</button>
+        <button type="button" class="header-btn" data-action="add-classic" title="Ajouter les pistes classiques">🎯</button>
+      </div>
+   
     </header>
     <main class="app-main">
       <section class="panel controls" id="controls-panel" aria-label="Contrôles principaux" hidden>

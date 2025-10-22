@@ -261,6 +261,36 @@
     }
   });
 
+  // Header buttons
+  document.addEventListener('click', (event) => {
+    const btn = event.target.closest('.header-btn');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    if (action === 'delete-tracks') {
+      if (confirm('Supprimer toutes les pistes ?')) {
+        state.boards.multipiste = [];
+        saveState();
+        render();
+      }
+    } else if (action === 'reset-scores') {
+      if (confirm('Réinitialiser tous les scores ?')) {
+        for (const collection of Object.values(state.boards)) {
+          collection.forEach(resetBoardEntries);
+        }
+        saveState();
+        renderBoards();
+      }
+    } else if (action === 'add-track') {
+      state.boards.multipiste.push(createBoard(`P${state.boards.multipiste.length + 1}`, 'multipiste'));
+      saveState();
+      renderBoards();
+    } else if (action === 'add-classic') {
+      state.boards.multipiste = DEFAULT_TRACKS.map((name) => createBoard(name, 'multipiste'));
+      saveState();
+      render();
+    }
+  });
+
   function render() {
     modeSelect.value = state.mode;
     multiplayerControls.hidden = state.mode !== 'multiplayer';
@@ -356,6 +386,15 @@
     initials.dataset.boardLabel = 'initials';
     initials.textContent = getBoardInitials(board.name);
     initials.title = board.name;
+    initials.style.cursor = 'pointer';
+    initials.addEventListener('click', () => {
+      const newName = prompt('Nouveau nom:', board.name);
+      if (newName && newName.trim()) {
+        board.name = newName.trim();
+        saveState();
+        renderBoards();
+      }
+    });
     block.appendChild(initials);
 
     // const fullName = document.createElement('span');
