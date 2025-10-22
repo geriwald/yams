@@ -430,7 +430,7 @@
       toggle.dataset.boardType = board.type;
       toggle.dataset.categoryId = category.id;
       const isActive = !isCrossed && value === category.fixedScore;
-      toggle.textContent = isActive ? String(category.fixedScore) : '0';
+      toggle.textContent = isActive ? String(category.fixedScore) : ' ';
       toggle.setAttribute('aria-pressed', isActive ? 'true' : 'false');
       if (isActive) {
         toggle.classList.add('active');

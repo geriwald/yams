@@ -280,7 +280,7 @@ body {
 
 .score-fixed-toggle {
   appearance: none;
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  border: none;
   background: rgba(15, 23, 42, 0.75);
   color: var(--text-muted);
   border-radius: 999px;
@@ -292,7 +292,6 @@ body {
 
 .score-fixed-toggle.active {
   background: var(--accent-muted);
-  border-color: rgba(34, 211, 238, 0.6);
   color: var(--accent);
   box-shadow: 0 4px 12px rgba(34, 211, 238, 0.25);
   transform: translateY(-1px);
@@ -306,9 +305,9 @@ body {
 .score-input {
   width: 100%;
   padding: 8px 10px;
-    border-radius: 10px;
-    border: 1px solid rgba(148, 163, 184, 0.4);
-    background: rgba(15, 23, 42, 0.65);
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.65);
   color: var(--text);
   font-size: 1rem;
   outline: none;
@@ -456,52 +455,53 @@ body {
   .inline-form {
     width: 100%;
   }
-.app-main {
-  padding: 0 8px 8px;
-}
 
-.panel {
-  padding: 8px;
-}
+  .app-main {
+    padding: 0 8px 8px;
+  }
 
-.score-grid-table th,
-.score-grid-table td {
-  padding: 8px 10px;
-  font-size: 0.85rem;
-}
+  .panel {
+    padding: 8px;
+  }
 
-.board-full-name {
-  font-size: 0.7rem;
-}
+  .score-grid-table th,
+  .score-grid-table td {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
 
-.app-header {
-  padding: 8px 12px 0;
-}
+  .board-full-name {
+    font-size: 0.7rem;
+  }
 
-.app-header h1 {
-  font-size: clamp(1.4rem, 4vw, 2rem);
-}
+  .app-header {
+    padding: 8px 12px 0;
+  }
 
-.app-footer {
-  padding: 12px 16px 0;
-  font-size: 0.75rem;
-}
+  .app-header h1 {
+    font-size: clamp(1.4rem, 4vw, 2rem);
+  }
 
-.score-cell {
-  width: 50px;
-  padding: 4px 6px;
-}
+  .app-footer {
+    padding: 12px 16px 0;
+    font-size: 0.75rem;
+  }
 
-.score-input {
-  padding: 4px 6px;
-}
+  .score-cell {
+    width: 50px;
+    padding: 4px 6px;
+  }
 
-.board-header-cell {
-  min-width: 80px;
-}
+  .score-input {
+    padding: 4px 6px;
+  }
 
-.category-header,
-.score-grid-table tbody .category-cell {
-  min-width: 120px;
-}
+  .board-header-cell {
+    min-width: 80px;
+  }
+
+  .category-header,
+  .score-grid-table tbody .category-cell {
+    min-width: 120px;
+  }
 }
