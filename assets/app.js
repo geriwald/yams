@@ -184,6 +184,14 @@
       numericValue = 999;
     }
 
+    if (numericValue === 0) {
+      context.board.entries[categoryId] = null;
+      input.value = '';
+      saveState();
+      updateBoardTotalsUI(context.board);
+      return;
+    }
+
     context.board.entries[categoryId] = numericValue;
     input.value = String(numericValue);
     saveState();
@@ -668,7 +676,7 @@
       //   sanitized.crossed[category.id] = true;
       //   return;
       // }
-      sanitized.entries[category.id] = Number.isFinite(numeric) && numeric >= 0 ? Math.min(999, Math.round(numeric)) : null;
+      sanitized.entries[category.id] = Number.isFinite(numeric) && numeric > 0 ? Math.min(999, Math.round(numeric)) : null;
     });
     return sanitized;
   }
