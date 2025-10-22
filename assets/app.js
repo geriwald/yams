@@ -184,9 +184,34 @@
       numericValue = 999;
     }
 
+    // Validation
+    let isValid = true;
+    if (UPPER_CATEGORIES.some(cat => cat.id === categoryId)) {
+      const cat = UPPER_CATEGORIES.find(cat => cat.id === categoryId);
+      if (numericValue >= cat.number) {
+        isValid = numericValue % cat.number === 0 && numericValue <= 6 * cat.number;
+      }
+    } else if (categoryId === 'threeKind') {
+      if (numericValue >= 3) {
+        isValid = numericValue % 3 === 0 && numericValue <= 6 * 3;
+      }
+    } else if (categoryId === 'fourKind') {
+      if (numericValue >= 4) {
+        isValid = numericValue % 4 === 0 && numericValue <= 6 * 4;
+      }
+    }
+
+    input.classList.toggle('invalid', !isValid);
+
+    if (!isValid) {
+      // Don't save invalid, but display
+      return;
+    }
+
     if (numericValue === 0) {
       context.board.entries[categoryId] = null;
       input.value = '';
+      input.classList.remove('invalid');
       saveState();
       updateBoardTotalsUI(context.board);
       return;
@@ -194,6 +219,7 @@
 
     context.board.entries[categoryId] = numericValue;
     input.value = String(numericValue);
+    input.classList.remove('invalid');
     saveState();
     updateBoardTotalsUI(context.board);
   });
@@ -492,7 +518,7 @@
     const upper = UPPER_CATEGORIES.reduce((total, category) => total + (entries[category.id] ?? 0), 0);
     const bonusAdvance = UPPER_CATEGORIES.reduce((total, category) => {
       const score = entries[category.id];
-      return total + (score != 0 ? score - 3 * category.number : 0);
+      return total + (score != null ? score - 3 * category.number : 0);
     }, 0);
     const lower = LOWER_CATEGORIES.reduce((total, category) => total + (entries[category.id] ?? 0), 0);
     const bonus = upper >= 63 ? 35 : 0;
