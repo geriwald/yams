@@ -2,12 +2,12 @@
   'use strict';
 
   const UPPER_CATEGORIES = [
-    { id: 'ones', label: 'As', hint: 'Total des dés à 1' },
-    { id: 'twos', label: 'Deux', hint: 'Total des dés à 2' },
-    { id: 'threes', label: 'Trois', hint: 'Total des dés à 3' },
-    { id: 'fours', label: 'Quatre', hint: 'Total des dés à 4' },
-    { id: 'fives', label: 'Cinq', hint: 'Total des dés à 5' },
-    { id: 'sixes', label: 'Six', hint: 'Total des dés à 6' }
+    { id: 'ones', label: 'As', hint: 'Total des dés à 1', number: 1 },
+    { id: 'twos', label: 'Deux', hint: 'Total des dés à 2', number: 2 },
+    { id: 'threes', label: 'Trois', hint: 'Total des dés à 3', number: 3 },
+    { id: 'fours', label: 'Quatre', hint: 'Total des dés à 4', number: 4 },
+    { id: 'fives', label: 'Cinq', hint: 'Total des dés à 5', number: 5 },
+    { id: 'sixes', label: 'Six', hint: 'Total des dés à 6', number: 6 }
   ];
 
   const LOWER_CATEGORIES = [
@@ -285,15 +285,16 @@
 
     const tbody = document.createElement('tbody');
 
-    // tbody.appendChild(createSectionRow('Section supérieure', boards.length + 1));
+    tbody.appendChild(createSectionRow('Section supérieure', boards.length + 1));
     UPPER_CATEGORIES.forEach((category) => {
       tbody.appendChild(createCategoryDataRow(category, boards));
     });
     tbody.appendChild(createTotalsDataRow('Somme supérieure', 'upper', boards, totalsByBoard));
+    tbody.appendChild(createTotalsDataRow('Avance', 'bonusAdvance', boards, totalsByBoard));
     tbody.appendChild(createTotalsDataRow('Bonus (≥ 63)', 'bonus', boards, totalsByBoard, true));
     tbody.appendChild(createTotalsDataRow('Total supérieur', 'upperWithBonus', boards, totalsByBoard));
 
-    // tbody.appendChild(createSectionRow('Section inférieure', boards.length + 1));
+    tbody.appendChild(createSectionRow('Section inférieure', boards.length + 1));
     LOWER_CATEGORIES.forEach((category) => {
       tbody.appendChild(createCategoryDataRow(category, boards));
     });
@@ -435,7 +436,13 @@
 
   function createTotalsDataRow(label, key, boards, totalsByBoard, isBonus = false) {
     const row = document.createElement('tr');
-    row.className = `score-row totals-row${isBonus ? ' totals-row-bonus' : ''}`;
+    let rowClass = `score-row totals-row`;
+    if (isBonus) {
+      rowClass += ' totals-row-bonus';
+    } else if (key === 'bonusAdvance') {
+      rowClass += ' totals-row-advance';
+    }
+    row.className = rowClass;
 
     const headerCell = document.createElement('th');
     headerCell.scope = 'row';
@@ -451,7 +458,11 @@
       value.dataset.total = key;
       value.dataset.boardId = board.id;
       const totals = totalsByBoard[board.id];
-      value.textContent = totals[key];
+      let displayValue = totals[key];
+      if (key === 'bonusAdvance') {
+        displayValue = displayValue > 0 ? `+${displayValue}` : displayValue;
+      }
+      value.textContent = displayValue;
       if (key === 'bonus' && totals[key] === 0) {
         value.classList.add('bonus-zero');
       }
@@ -471,11 +482,15 @@
 
   function computeTotals(entries) {
     const upper = UPPER_CATEGORIES.reduce((total, category) => total + (entries[category.id] ?? 0), 0);
+    const bonusAdvance = UPPER_CATEGORIES.reduce((total, category) => {
+      const score = entries[category.id];
+      return total + (score != 0 ? score - 3 * category.number : 0);
+    }, 0);
     const lower = LOWER_CATEGORIES.reduce((total, category) => total + (entries[category.id] ?? 0), 0);
     const bonus = upper >= 63 ? 35 : 0;
     const upperWithBonus = upper + bonus;
     const grand = upperWithBonus + lower;
-    return { upper, lower, bonus, upperWithBonus, grand };
+    return { upper, bonusAdvance, lower, bonus, upperWithBonus, grand };
   }
 
   function getBoardContext(boardId, boardType) {
@@ -504,6 +519,7 @@
     const totals = computeTotals(board.entries);
     const totalMap = {
       upper: totals.upper,
+      bonusAdvance: totals.bonusAdvance,
       bonus: totals.bonus,
       upperWithBonus: totals.upperWithBonus,
       lower: totals.lower,
@@ -511,7 +527,11 @@
     };
     Object.entries(totalMap).forEach(([key, value]) => {
       boardsContainer.querySelectorAll(`[data-total="${key}"][data-board-id="${board.id}"]`).forEach((target) => {
-        target.textContent = value;
+        let displayValue = value;
+        if (key === 'bonusAdvance') {
+          displayValue = value > 0 ? `+${value}` : value;
+        }
+        target.textContent = displayValue;
         if (key === 'bonus') {
           target.classList.toggle('bonus-zero', value === 0);
         }

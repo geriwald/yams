@@ -195,7 +195,7 @@ body {
 .score-grid-table th,
 .score-grid-table td {
   border: 1px solid rgba(148, 163, 184, 0.18);
-  padding: 12px 14px;
+  padding: 0px;
   font-size: 0.85rem;
 }
 
@@ -281,17 +281,16 @@ body {
 
 .score-fixed-toggle {
   width: 100%;
-    height: 100%;
+  height: 100%;
     padding: 12px 14px;
   border: none;
   background: transparent;
-    color: var(--text);
+  color: var(--text);
     font-size: 0.85rem;
   cursor: pointer;
   text-align: center;
-  }
-  
-  .score-fixed-toggle.active {
+}
+/* .score-fixed-toggle.active {
   color: var(--accent);
   text-align: center;
 }
@@ -301,37 +300,22 @@ body {
   cursor: not-allowed;
 }
 
+*/
 .score-input {
   width: 100%;
   padding: 12px 14px;
-    border: none;
+  border: none;
     background: transparent;
   color: var(--text);
   font-size: 0.85rem;
   outline: none;
   text-align: center;
-  }
-  
-  .score-cell .score-input {
+}
+
+.score-cell .score-input {
   cursor: text;
 }
 
-.score-input-crossed {
-  background: rgba(15, 23, 42, 0.45);
-  cursor: not-allowed;
-}
-
-.score-cell-crossed::after {
-  content: '';
-  position: absolute;
-  inset: 6px;
-  background:
-    linear-gradient(135deg, rgba(248, 113, 113, 0.35), rgba(248, 113, 113, 0)),
-    linear-gradient(-135deg, rgba(248, 113, 113, 0.35), rgba(248, 113, 113, 0));
-  pointer-events: none;
-  border-radius: 10px;
-  opacity: 0.75;
-}
 
 .category-button {
   appearance: none;
@@ -398,6 +382,13 @@ body {
   background: rgba(248, 113, 113, 0.08);
 }
 
+.totals-row-advance {
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.totals-row-advance .total-value {
+  color: green;
+}
 .empty-state {
   text-align: center;
   padding: 40px 20px;
@@ -456,9 +447,11 @@ body {
     padding: 8px;
   }
 
-  .score-grid-table th,
+    .score-grid-table th {
+      padding: 8px 10px;
+    }
   .score-grid-table td {
-    padding: 8px 10px;
+    padding: 2px 2px;
   }
 
   .board-full-name {
