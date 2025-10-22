@@ -403,6 +403,7 @@
     });
     tbody.appendChild(createTotalsDataRow('Total inférieur', 'lower', boards, totalsByBoard));
     tbody.appendChild(createTotalsDataRow('Total général', 'grand', boards, totalsByBoard));
+    tbody.appendChild(createGlobalTotalRow(boards, totalsByBoard));
 
     table.appendChild(tbody);
     wrapper.appendChild(table);
@@ -831,5 +832,29 @@
       sanitized.entries[category.id] = Number.isFinite(numeric) && numeric > 0 ? Math.min(999, Math.round(numeric)) : null;
     });
     return sanitized;
+  }
+
+  function createGlobalTotalRow(boards, totalsByBoard) {
+    const row = document.createElement('tr');
+    row.className = 'score-row totals-row global-total-row';
+
+    const headerCell = document.createElement('th');
+    headerCell.scope = 'row';
+    headerCell.className = 'category-cell';
+    headerCell.textContent = 'Total global';
+    row.appendChild(headerCell);
+
+    const globalTotal = boards.reduce((sum, board) => sum + (totalsByBoard[board.id].grand || 0), 0);
+
+    const totalCell = document.createElement('td');
+    totalCell.className = 'total-cell global-total-cell';
+    totalCell.colSpan = boards.length;
+    const value = document.createElement('span');
+    value.className = 'total-value';
+    value.textContent = globalTotal;
+    totalCell.appendChild(value);
+    row.appendChild(totalCell);
+
+    return row;
   }
 })();
