@@ -162,11 +162,6 @@
     }
     input.disabled = false;
     input.classList.remove('score-input-crossed');
-    const markToggle = cell ? cell.querySelector('.mark-toggle') : null;
-    if (markToggle instanceof HTMLElement) {
-      markToggle.textContent = 'Rayer';
-    }
-
     const rawValue = input.value.trim();
     if (rawValue === '') {
       context.board.entries[categoryId] = null;
@@ -198,9 +193,40 @@
   boardsContainer.addEventListener('click', (event) => {
     const button = event.target instanceof HTMLElement ? event.target.closest('[data-action]') : null;
     if (!button) {
+      const targetElement = event.target instanceof HTMLElement ? event.target : null;
+      if (!targetElement) {
+        return;
+      }
+      const cell = targetElement.closest('.score-cell');
+      if (!cell) {
+        return;
+      }
+      if (targetElement.closest('.score-input') || targetElement.closest('.score-fixed-toggle')) {
+        return;
+      }
+      const boardId = cell.dataset.boardId;
+      const boardType = cell.dataset.boardType ?? state.mode;
+      const categoryId = cell.dataset.categoryId;
+      if (!boardId || !boardType || !categoryId) {
+        return;
+      }
+      const context = getBoardContext(boardId, boardType);
+      if (!context) {
+        return;
+      }
+      const crossedMap = context.board.crossed ?? (context.board.crossed = createEmptyMarks());
+      const currentlyCrossed = Boolean(crossedMap[categoryId]);
+      if (currentlyCrossed) {
+        crossedMap[categoryId] = false;
+        context.board.entries[categoryId] = null;
+      } else {
+        crossedMap[categoryId] = true;
+        context.board.entries[categoryId] = 0;
+      }
+      saveState();
+      renderBoards();
       return;
     }
-
     const boardId = button.dataset.boardId;
     const boardType = button.dataset.boardType ?? state.mode;
     const action = button.dataset.action;
@@ -229,64 +255,6 @@
       saveState();
       renderBoards();
       return;
-    }
-
-    if (action === 'toggle-cross') {
-      const categoryId = button.dataset.categoryId;
-      if (!categoryId) {
-        return;
-      }
-      const crossedMap = context.board.crossed ?? (context.board.crossed = createEmptyMarks());
-      const currentlyCrossed = Boolean(crossedMap[categoryId]);
-      if (currentlyCrossed) {
-        crossedMap[categoryId] = false;
-        context.board.entries[categoryId] = null;
-      } else {
-        crossedMap[categoryId] = true;
-        context.board.entries[categoryId] = 0;
-      }
-      saveState();
-      renderBoards();
-      return;
-    }
-
-    if (action === 'rename-board') {
-      const newName = window.prompt('Nouveau nom ?', context.board.name);
-      if (!newName) {
-        return;
-      }
-      const trimmed = newName.trim();
-      if (!trimmed) {
-        return;
-      }
-      context.board.name = trimmed;
-      saveState();
-      renderBoards();
-      return;
-    }
-
-    if (action === 'clear-board') {
-      if (!window.confirm(`Vider la grille « ${context.board.name} » ?`)) {
-        return;
-      }
-      resetBoardEntries(context.board);
-      saveState();
-      renderBoards();
-      return;
-    }
-
-    if (action === 'remove-board') {
-      const collection = state.boards[boardType];
-      if (collection.length <= 1) {
-        window.alert('Impossible de supprimer la dernière grille.');
-        return;
-      }
-      if (!window.confirm(`Supprimer ${boardType === 'multipiste' ? 'la piste' : 'le joueur'} « ${context.board.name} » ?`)) {
-        return;
-      }
-      collection.splice(context.index, 1);
-      saveState();
-      renderBoards();
     }
   });
 
@@ -352,15 +320,15 @@
     UPPER_CATEGORIES.forEach((category) => {
       tbody.appendChild(createCategoryDataRow(category, boards));
     });
-    tbody.appendChild(createTotalsDataRow('Somme', 'upper', boards, totalsByBoard));
-    tbody.appendChild(createTotalsDataRow('Bonus', 'bonus', boards, totalsByBoard, true));
-    tbody.appendChild(createTotalsDataRow('Total haut', 'upperWithBonus', boards, totalsByBoard));
+    tbody.appendChild(createTotalsDataRow('Somme supérieure', 'upper', boards, totalsByBoard));
+    tbody.appendChild(createTotalsDataRow('Bonus (≥ 63)', 'bonus', boards, totalsByBoard, true));
+    tbody.appendChild(createTotalsDataRow('Total supérieur', 'upperWithBonus', boards, totalsByBoard));
 
     tbody.appendChild(createSectionRow('Section inférieure', boards.length + 1));
     LOWER_CATEGORIES.forEach((category) => {
       tbody.appendChild(createCategoryDataRow(category, boards));
     });
-    tbody.appendChild(createTotalsDataRow('Total bas', 'lower', boards, totalsByBoard));
+    tbody.appendChild(createTotalsDataRow('Total inférieur', 'lower', boards, totalsByBoard));
     tbody.appendChild(createTotalsDataRow('Total général', 'grand', boards, totalsByBoard));
 
     table.appendChild(tbody);
@@ -375,8 +343,25 @@
     th.className = 'board-header-cell';
     th.dataset.boardId = board.id;
 
-    th.textContent = board.name;
-    th.dataset.boardId = board.id;
+    const block = document.createElement('div');
+    block.className = 'board-header-block';
+
+    const initials = document.createElement('span');
+    initials.className = 'board-initials';
+    initials.dataset.boardId = board.id;
+    initials.dataset.boardLabel = 'initials';
+    initials.textContent = getBoardInitials(board.name);
+    initials.title = board.name;
+    block.appendChild(initials);
+
+    const fullName = document.createElement('span');
+    fullName.className = 'board-full-name';
+    fullName.dataset.boardId = board.id;
+    fullName.dataset.boardLabel = 'name';
+    fullName.textContent = board.name;
+    block.appendChild(fullName);
+
+    th.appendChild(block);
     return th;
   }
 
@@ -422,6 +407,9 @@
   function createScoreCell(board, category) {
     const cell = document.createElement('td');
     cell.className = 'score-cell';
+    cell.dataset.boardId = board.id;
+    cell.dataset.boardType = board.type;
+    cell.dataset.categoryId = category.id;
     const isFixed = typeof category.fixedScore === 'number';
     const crossedMap = board.crossed ?? (board.crossed = createEmptyMarks());
     const isCrossed = Boolean(crossedMap[category.id]);
@@ -470,16 +458,6 @@
       }
       container.appendChild(input);
     }
-
-    const crossButton = document.createElement('button');
-    crossButton.type = 'button';
-    crossButton.className = 'mark-toggle';
-    crossButton.dataset.action = 'toggle-cross';
-    crossButton.dataset.boardId = board.id;
-    crossButton.dataset.boardType = board.type;
-    crossButton.dataset.categoryId = category.id;
-    crossButton.textContent = isCrossed ? 'A' : 'R';
-    container.appendChild(crossButton);
 
     cell.appendChild(container);
     return cell;

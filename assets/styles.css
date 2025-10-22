@@ -231,7 +231,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 .board-initials {
@@ -256,31 +256,6 @@ body {
   word-break: break-word;
 }
 
-.board-actions {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.board-action-button {
-  background: transparent;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-}
-
-.board-action-button:hover,
-.board-action-button:focus-visible {
-  color: var(--accent);
-  border-color: rgba(34, 211, 238, 0.6);
-  background: rgba(34, 211, 238, 0.08);
-}
-
 .score-row:nth-of-type(odd) .score-cell {
   background: rgba(15, 23, 42, 0.55);
 }
@@ -292,13 +267,14 @@ body {
 .score-cell {
   width: 120px;
   position: relative;
+  cursor: pointer;
 }
 
 .score-cell-content {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .score-fixed-toggle {
@@ -343,29 +319,14 @@ body {
   background: rgba(15, 23, 42, 0.85);
 }
 
+.score-cell .score-input {
+  cursor: text;
+}
+
 .score-input-crossed {
   border-color: rgba(148, 163, 184, 0.2);
   background: rgba(15, 23, 42, 0.45);
   cursor: not-allowed;
-}
-
-.mark-toggle {
-  appearance: none;
-  border: 1px dashed rgba(148, 163, 184, 0.35);
-  background: transparent;
-  color: var(--text-muted);
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 0.7rem;
-  cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-}
-
-.mark-toggle:hover,
-.mark-toggle:focus-visible {
-  color: var(--accent);
-  border-color: rgba(34, 211, 238, 0.6);
-  background: rgba(34, 211, 238, 0.08);
 }
 
 .score-cell-crossed::after {
@@ -490,16 +451,7 @@ body {
 
   .mode-toggle,
   .mode-controls,
-.inline-form {
-  width: 100%;
-}
-
-  .board-actions {
-    gap: 4px;
-  }
-
-  .board-action-button {
-    font-size: 0.65rem;
-    padding: 4px 8px;
+  .inline-form {
+    width: 100%;
   }
 }
