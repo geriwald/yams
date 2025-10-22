@@ -199,6 +199,8 @@
     } else if (categoryId === 'fourKind') {
       const validFourKind = [4, 8, 12, 16, 20, 24];
       isValid = validFourKind.includes(numericValue);
+    } else if (categoryId === 'chance') {
+      isValid = numericValue >= 5 && numericValue <= 30;
     }
 
     input.classList.toggle('invalid', !isValid);
