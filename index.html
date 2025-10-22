@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Compteur de score Yams</title>
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Compteur Yams</h1>
+      <button type="button" class="button ghost" id="toggle-controls" aria-expanded="false" aria-controls="controls-panel">
+        Options
+      </button>
+    </header>
+    <main class="app-main">
+      <section class="panel controls" id="controls-panel" aria-label="Contrôles principaux" hidden>
+        <div class="mode-toggle">
+          <label for="mode-select">Mode</label>
+          <select id="mode-select" class="input">
+            <option value="multiplayer">Multijoueur</option>
+            <option value="multipiste">Multipiste</option>
+          </select>
+        </div>
+        <div id="multiplayer-controls" class="mode-controls" hidden>
+          <form id="add-player-form" class="inline-form" autocomplete="off">
+            <label class="sr-only" for="player-name">Nom du joueur</label>
+            <input id="player-name" name="player-name" class="input" placeholder="Nom du joueur" required>
+            <button type="submit" class="button primary">Ajouter un joueur</button>
+          </form>
+        </div>
+        <div id="multipiste-controls" class="mode-controls" hidden>
+          <form id="add-track-form" class="inline-form" autocomplete="off">
+            <label class="sr-only" for="track-name">Nom de la piste</label>
+            <input id="track-name" name="track-name" class="input" placeholder="Nouvelle piste">
+            <button type="submit" class="button primary">Ajouter une piste</button>
+          </form>
+          <button type="button" class="button ghost" id="restore-default-tracks">Restaurer les pistes classiques</button>
+        </div>
+        <button type="button" class="button danger" id="reset-all">Réinitialiser toutes les grilles</button>
+      </section>
+      <section id="boards" class="boards" aria-live="polite"></section>
+    </main>
+    <footer class="app-footer">
+      <small>Planifiez vos parties de Yams facilement. Astuces de stratégie à venir.</small>
+    </footer>
+    <script src="assets/app.js" defer></script>
+  </body>
+</html>
