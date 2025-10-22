@@ -275,7 +275,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 0px;
 }
 
 .score-fixed-toggle {
@@ -305,16 +305,18 @@ body {
 
 .score-input {
   width: 100%;
-  padding: 12px x14p;
-  border: none;
-  background: transparent;
+  padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    background: rgba(15, 23, 42, 0.65);
   color: var(--text);
   font-size: 1rem;
   outline: none;
-  transition: background 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .score-input:focus {
+  border-color: var(--accent);
   background: rgba(15, 23, 42, 0.85);
 }
 
@@ -323,6 +325,7 @@ body {
 }
 
 .score-input-crossed {
+  border-color: rgba(148, 163, 184, 0.2);
   background: rgba(15, 23, 42, 0.45);
   cursor: not-allowed;
 }
@@ -453,4 +456,52 @@ body {
   .inline-form {
     width: 100%;
   }
+.app-main {
+  padding: 0 8px 8px;
+}
+
+.panel {
+  padding: 8px;
+}
+
+.score-grid-table th,
+.score-grid-table td {
+  padding: 8px 10px;
+  font-size: 0.85rem;
+}
+
+.board-full-name {
+  font-size: 0.7rem;
+}
+
+.app-header {
+  padding: 8px 12px 0;
+}
+
+.app-header h1 {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+}
+
+.app-footer {
+  padding: 12px 16px 0;
+  font-size: 0.75rem;
+}
+
+.score-cell {
+  width: 50px;
+  padding: 4px 6px;
+}
+
+.score-input {
+  padding: 4px 6px;
+}
+
+.board-header-cell {
+  min-width: 80px;
+}
+
+.category-header,
+.score-grid-table tbody .category-cell {
+  min-width: 120px;
+}
 }
