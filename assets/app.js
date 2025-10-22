@@ -629,6 +629,18 @@
         }
       });
     });
+
+    // Mise à jour du total global si plusieurs boards
+    if (state.boards.length > 1) {
+      const globalTotal = state.boards.reduce((sum, b) => {
+        const bTotals = computeTotals(b.entries, b.crossed);
+        return sum + (bTotals.grand || 0);
+      }, 0);
+      const globalCell = boardsContainer.querySelector('.global-total-cell .total-value');
+      if (globalCell) {
+        globalCell.textContent = globalTotal;
+      }
+    }
   }
 
   function createDefaultState() {
