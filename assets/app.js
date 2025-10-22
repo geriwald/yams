@@ -357,7 +357,9 @@
     });
     tbody.appendChild(createTotalsDataRow('Total inférieur', 'lower', boards, totalsByBoard));
     tbody.appendChild(createTotalsDataRow('Total général', 'grand', boards, totalsByBoard));
-    tbody.appendChild(createGlobalTotalRow(boards, totalsByBoard));
+    if (boards.length > 1) {
+      tbody.appendChild(createGlobalTotalRow(boards, totalsByBoard));
+    }
 
     table.appendChild(tbody);
     wrapper.appendChild(table);
