@@ -52,6 +52,7 @@
   const toggleControlsButton = document.querySelector('#toggle-controls');
 
   let state = loadState() ?? createDefaultState();
+  let isCrossMode = false;
   ensureDefaultBoards();
   render();
 
@@ -140,6 +141,9 @@
     if (!(input instanceof HTMLInputElement) || !input.classList.contains('score-input')) {
       return;
     }
+    if (input.readOnly) {
+      return;
+    }
 
     const boardId = input.dataset.boardId;
     const boardType = input.dataset.boardType;
@@ -192,13 +196,11 @@
         isValid = numericValue % cat.number === 0 && numericValue <= 6 * cat.number;
       }
     } else if (categoryId === 'threeKind') {
-      if (numericValue >= 3) {
-        isValid = numericValue % 3 === 0 && numericValue <= 6 * 3;
-      }
+      const validThreeKind = [3, 6, 9, 12, 15, 18];
+      isValid = validThreeKind.includes(numericValue);
     } else if (categoryId === 'fourKind') {
-      if (numericValue >= 4) {
-        isValid = numericValue % 4 === 0 && numericValue <= 6 * 4;
-      }
+      const validFourKind = [4, 8, 12, 16, 20, 24];
+      isValid = validFourKind.includes(numericValue);
     }
 
     input.classList.toggle('invalid', !isValid);
@@ -227,7 +229,25 @@
   boardsContainer.addEventListener('click', (event) => {
     const button = event.target instanceof HTMLElement ? event.target.closest('[data-action]') : null;
     if (!button) {
-      // Removed crossing mechanism
+      if (isCrossMode && event.target.closest('.score-cell')) {
+        const cell = event.target.closest('.score-cell');
+        const boardId = cell.dataset.boardId;
+        const boardType = cell.dataset.boardType;
+        const categoryId = cell.dataset.categoryId;
+        const context = getBoardContext(boardId, boardType);
+        if (context) {
+          const crossedMap = context.board.crossed ?? (context.board.crossed = createEmptyMarks());
+          crossedMap[categoryId] = !crossedMap[categoryId];
+          if (crossedMap[categoryId]) {
+            // Si biffé, remettre entry à null
+            context.board.entries[categoryId] = null;
+          }
+          saveState();
+          renderBoards();
+          isCrossMode = false;
+          document.querySelector('[data-action="toggle-cross-mode"]').classList.remove('active');
+        }
+      }
       return;
     }
     const boardId = button.dataset.boardId;
@@ -252,9 +272,27 @@
       if (!category || typeof category.fixedScore !== 'number') {
         return;
       }
-      const isActive = context.board.entries[categoryId] === category.fixedScore; // Removed crossed check
-      // context.board.crossed[categoryId] = false; // Removed
-      context.board.entries[categoryId] = isActive ? null : category.fixedScore;
+      const crossedMap = context.board.crossed ?? (context.board.crossed = createEmptyMarks());
+      if (isCrossMode) {
+        // En mode biffure, toggle crossed au lieu de toggle fixed
+        crossedMap[categoryId] = !crossedMap[categoryId];
+        if (crossedMap[categoryId]) {
+          context.board.entries[categoryId] = null;
+        }
+        saveState();
+        renderBoards();
+        isCrossMode = false;
+        document.querySelector('[data-action="toggle-cross-mode"]').classList.remove('active');
+        return;
+      }
+      if (crossedMap[categoryId]) {
+        // Si déjà biffé, débiffer
+        crossedMap[categoryId] = false;
+        context.board.entries[categoryId] = null;
+      } else {
+        const isActive = context.board.entries[categoryId] === category.fixedScore;
+        context.board.entries[categoryId] = isActive ? null : category.fixedScore;
+      }
       saveState();
       renderBoards();
       return;
@@ -288,6 +326,10 @@
       state.boards.multipiste = DEFAULT_TRACKS.map((name) => createBoard(name, 'multipiste'));
       saveState();
       render();
+    } else if (action === 'toggle-cross-mode') {
+      isCrossMode = !isCrossMode;
+      const btn = event.target.closest('.header-btn');
+      btn.classList.toggle('active', isCrossMode);
     }
   });
 
@@ -452,10 +494,10 @@
     cell.dataset.categoryId = category.id;
     const isFixed = typeof category.fixedScore === 'number';
     const crossedMap = board.crossed ?? (board.crossed = createEmptyMarks());
-    const isCrossed = false; // Mechanism removed
-    // if (isCrossed) {
-    //   cell.classList.add('score-cell-crossed');
-    // }
+    const isCrossed = crossedMap[category.id];
+    if (isCrossed) {
+      cell.classList.add('score-cell-crossed');
+    }
 
     const value = board.entries[category.id];
     const container = document.createElement('div');
@@ -475,9 +517,9 @@
       if (isActive) {
         toggle.classList.add('active');
       }
-      // if (isCrossed) {
-      //   toggle.disabled = true;
-      // }
+      if (isCrossed) {
+        toggle.disabled = true;
+      }
       container.appendChild(toggle);
     } else {
       const input = document.createElement('input');
@@ -491,12 +533,11 @@
       input.dataset.boardId = board.id;
       input.dataset.boardType = board.type;
       input.dataset.categoryId = category.id;
-      // Removed crossed logic
-      // if (isCrossed) {
-      //   input.disabled = true;
-      //   input.value = '';
-      //   input.classList.add('score-input-crossed');
-      // }
+      if (isCrossed) {
+        input.readOnly = true;
+        input.value = '';
+        input.classList.add('score-input-crossed');
+      }
       container.appendChild(input);
     }
 
@@ -543,18 +584,24 @@
 
   function computeAllTotals(boards) {
     return boards.reduce((accumulator, board) => {
-      accumulator[board.id] = computeTotals(board.entries);
+      accumulator[board.id] = computeTotals(board.entries, board.crossed);
       return accumulator;
     }, {});
   }
 
-  function computeTotals(entries) {
+  function computeTotals(entries, crossed) {
     const upper = UPPER_CATEGORIES.reduce((total, category) => total + (entries[category.id] ?? 0), 0);
     const bonusAdvance = UPPER_CATEGORIES.reduce((total, category) => {
       const score = entries[category.id];
-      return total + (score != null ? score - 3 * category.number : 0);
+      if (crossed[category.id]) {
+        return total - 3 * category.number;
+      } else if (score != null) {
+        return total + score - 3 * category.number;
+      } else {
+        return total;
+      }
     }, 0);
-    const isUpperComplete = UPPER_CATEGORIES.every(cat => entries[cat.id] != null);
+    const isUpperComplete = UPPER_CATEGORIES.every(cat => entries[cat.id] != null || crossed[cat.id]);
     const lower = LOWER_CATEGORIES.reduce((total, category) => total + (entries[category.id] ?? 0), 0);
     const bonus = upper >= 63 ? 35 : 0;
     const upperWithBonus = upper + bonus;
@@ -570,7 +617,7 @@
   }
 
   function computeMaxRemainingAdvance(board) {
-    const remainingCats = UPPER_CATEGORIES.filter(cat => board.entries[cat.id] == null);
+    const remainingCats = UPPER_CATEGORIES.filter(cat => board.entries[cat.id] == null && !board.crossed[cat.id]);
     return remainingCats.reduce((sum, cat) => sum + 2 * cat.number, 0);
   }
 
@@ -624,15 +671,14 @@
   function resetBoardEntries(board) {
     ALL_CATEGORIES.forEach((category) => {
       board.entries[category.id] = null;
-      // Removed crossed reset
-      // if (board.crossed) {
-      //   board.crossed[category.id] = false;
-      // }
+      if (board.crossed) {
+        board.crossed[category.id] = false;
+      }
     });
   }
 
   function updateBoardTotalsUI(board) {
-    const totals = computeTotals(board.entries);
+    const totals = computeTotals(board.entries, board.crossed);
     const totalMap = {
       upper: totals.upper,
       bonusAdvance: totals.bonusAdvance,
@@ -777,12 +823,11 @@
     ALL_CATEGORIES.forEach((category) => {
       const value = sourceEntries[category.id];
       const numeric = Number(value);
-      // Removed crossed logic
-      // if (sourceCrossed[category.id]) {
-      //   sanitized.entries[category.id] = 0;
-      //   sanitized.crossed[category.id] = true;
-      //   return;
-      // }
+      if (sourceCrossed[category.id]) {
+        sanitized.entries[category.id] = null;
+        sanitized.crossed[category.id] = true;
+        return;
+      }
       sanitized.entries[category.id] = Number.isFinite(numeric) && numeric > 0 ? Math.min(999, Math.round(numeric)) : null;
     });
     return sanitized;
