@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = 'v2.2-debug';
+  const APP_VERSION = 'v3.1';
 
   const UPPER_CATEGORIES = [
     { id: 'ones', label: 'As', hint: 'Total des dés à 1', number: 1 },
@@ -27,7 +27,7 @@
     accumulator[category.id] = category;
     return accumulator;
   }, Object.create(null));
-  const STORAGE_KEY = 'yams-scorekeeper-v1';
+  const STORAGE_KEY = 'yams-scorekeeper-v3';
   const DEFAULT_TRACKS = ['Montée', 'Descente', 'Libre', 'Premier'];
 
   const storageAvailable = (() => {
@@ -42,102 +42,97 @@
     }
   })();
 
-  const modeSelect = document.querySelector('#mode-select');
   const boardsContainer = document.querySelector('#boards');
-  const multiplayerControls = document.querySelector('#multiplayer-controls');
-  const multipisteControls = document.querySelector('#multipiste-controls');
-  const addPlayerForm = document.querySelector('#add-player-form');
-  const addTrackForm = document.querySelector('#add-track-form');
-  const resetAllButton = document.querySelector('#reset-all');
-  const restoreTracksButton = document.querySelector('#restore-default-tracks');
-  const controlsPanel = document.querySelector('#controls-panel');
-  const toggleControlsButton = document.querySelector('#toggle-controls');
 
   console.log(`Yams Scorekeeper ${APP_VERSION}`);
 
   let state = loadState() ?? createDefaultState();
   let isCrossMode = false;
-  ensureDefaultBoards();
   render();
 
-  if (toggleControlsButton && controlsPanel) {
-    toggleControlsButton.addEventListener('click', () => {
-      const isHidden = controlsPanel.hasAttribute('hidden');
-      if (isHidden) {
-        controlsPanel.removeAttribute('hidden');
-        toggleControlsButton.setAttribute('aria-expanded', 'true');
-      } else {
-        controlsPanel.setAttribute('hidden', '');
-        toggleControlsButton.setAttribute('aria-expanded', 'false');
+  // Header buttons
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+
+    const btn = target.closest('.header-btn, .editor-btn');
+    const editor = document.getElementById('column-editor');
+
+    if (btn && btn.dataset.action) {
+      const action = btn.dataset.action;
+
+      if (action === 'delete-tracks') {
+        editor.setAttribute('hidden', '');
+        if (confirm('Supprimer toutes les pistes ?')) {
+          state.boards = [];
+          saveState();
+          render();
+        }
+        return;
       }
-    });
-  }
 
-  modeSelect.addEventListener('change', (event) => {
-    const newMode = event.target.value === 'multipiste' ? 'multipiste' : 'multiplayer';
-    if (state.mode === newMode) {
-      return;
-    }
-    state.mode = newMode;
-    ensureDefaultBoards();
-    saveState();
-    render();
-  });
+      if (action === 'reset-scores') {
+        if (confirm('Vider toutes les grilles ?')) {
+          state.boards.forEach(resetBoardEntries);
+          saveState();
+          renderBoards();
+        }
+        return;
+      }
 
-  addPlayerForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const formData = new FormData(addPlayerForm);
-    const rawName = (formData.get('player-name') ?? '').toString().trim();
-    if (!rawName) {
-      return;
-    }
-    state.boards.multiplayer.push(createBoard(rawName, 'multiplayer'));
-    addPlayerForm.reset();
-    saveState();
-    if (state.mode !== 'multiplayer') {
-      state.mode = 'multiplayer';
-      modeSelect.value = 'multiplayer';
-    }
-    renderBoards();
-  });
+      if (action === 'add-track') {
+        editor.setAttribute('hidden', '');
+        const name = prompt('Nom du joueur:', `Joueur ${state.boards.length + 1}`);
+        if (name && name.trim()) {
+          state.boards.push(createBoard(name.trim()));
+          saveState();
+          renderBoards();
+        }
+        return;
+      }
 
-  addTrackForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const formData = new FormData(addTrackForm);
-    const rawName = (formData.get('track-name') ?? '').toString().trim();
-    if (!rawName) {
-      return;
-    }
-    state.boards.multipiste.push(createBoard(rawName, 'multipiste'));
-    addTrackForm.reset();
-    saveState();
-    if (state.mode !== 'multipiste') {
-      state.mode = 'multipiste';
-      modeSelect.value = 'multipiste';
-    }
-    renderBoards();
-  });
+      if (action === 'add-three-tracks') {
+        editor.setAttribute('hidden', '');
+        if (confirm('Cela supprimera toutes les pistes actuelles et ajoutera les trois pistes classiques. Continuer ?')) {
+          state.boards = ['Montée', 'Descente', 'Libre'].map((name) => createBoard(name));
+          saveState();
+          render();
+        }
+        return;
+      }
 
-  resetAllButton.addEventListener('click', () => {
-    if (!window.confirm('Réinitialiser toutes les grilles ?')) {
-      return;
-    }
-    for (const collection of Object.values(state.boards)) {
-      collection.forEach(resetBoardEntries);
-    }
-    saveState();
-    renderBoards();
-  });
+      if (action === 'add-four-tracks') {
+        editor.setAttribute('hidden', '');
+        if (confirm('Cela supprimera toutes les pistes actuelles et ajoutera les quatre pistes classiques. Continuer ?')) {
+          state.boards = DEFAULT_TRACKS.map((name) => createBoard(name));
+          saveState();
+          render();
+        }
+        return;
+      }
 
-  restoreTracksButton.addEventListener('click', () => {
-    if (!window.confirm('Restaurer les pistes classiques ? Les valeurs actuelles seront perdues.')) {
-      return;
+      if (action === 'toggle-cross-mode') {
+        isCrossMode = !isCrossMode;
+        btn.classList.toggle('active', isCrossMode);
+        return;
+      }
+
+      if (action === 'edit-columns') {
+        const isHidden = editor.hasAttribute('hidden');
+        if (isHidden) {
+          editor.removeAttribute('hidden');
+        } else {
+          editor.setAttribute('hidden', '');
+        }
+        return;
+      }
     }
-    state.boards.multipiste = DEFAULT_TRACKS.map((name) => createBoard(name, 'multipiste'));
-    state.mode = 'multipiste';
-    modeSelect.value = 'multipiste';
-    saveState();
-    render();
+
+    // Si on clique ailleurs (pas sur un bouton), fermer l'éditeur si ouvert
+    const clickedInEditor = target.closest('#column-editor');
+    if (!clickedInEditor && !editor.hasAttribute('hidden')) {
+      editor.setAttribute('hidden', '');
+    }
   });
 
   boardsContainer.addEventListener('input', (event) => {
@@ -150,20 +145,19 @@
     }
 
     const boardId = input.dataset.boardId;
-    const boardType = input.dataset.boardType;
     const categoryId = input.dataset.categoryId;
 
-    if (!boardId || !boardType || !categoryId) {
+    if (!boardId || !categoryId) {
       return;
     }
 
-    const context = getBoardContext(boardId, boardType);
-    if (!context) {
+    const board = state.boards.find(b => b.id === boardId);
+    if (!board) {
       return;
     }
 
-    const crossedMap = context.board.crossed ?? (context.board.crossed = createEmptyMarks());
-    crossedMap[categoryId] = false; // Keep for compatibility, but mechanism removed
+    const crossedMap = board.crossed ?? (board.crossed = createEmptyMarks());
+    crossedMap[categoryId] = false;
     const cell = input.closest('.score-cell');
     if (cell) {
       cell.classList.remove('score-cell-crossed');
@@ -172,18 +166,18 @@
     input.classList.remove('score-input-crossed');
     const rawValue = input.value.trim();
     if (rawValue === '') {
-      context.board.entries[categoryId] = null;
+      board.entries[categoryId] = null;
       saveState();
-      updateBoardTotalsUI(context.board);
+      updateBoardTotalsUI(board);
       return;
     }
 
     let numericValue = Number(rawValue.replace(',', '.'));
     if (!Number.isFinite(numericValue)) {
       input.value = '';
-      context.board.entries[categoryId] = null;
+      board.entries[categoryId] = null;
       saveState();
-      updateBoardTotalsUI(context.board);
+      updateBoardTotalsUI(board);
       return;
     }
 
@@ -210,24 +204,23 @@
     input.classList.toggle('invalid', !isValid);
 
     if (!isValid) {
-      // Don't save invalid, but display
       return;
     }
 
     if (numericValue === 0) {
-      context.board.entries[categoryId] = null;
+      board.entries[categoryId] = null;
       input.value = '';
       input.classList.remove('invalid');
       saveState();
-      updateBoardTotalsUI(context.board);
+      updateBoardTotalsUI(board);
       return;
     }
 
-    context.board.entries[categoryId] = numericValue;
+    board.entries[categoryId] = numericValue;
     input.value = String(numericValue);
     input.classList.remove('invalid');
     saveState();
-    updateBoardTotalsUI(context.board);
+    updateBoardTotalsUI(board);
   });
 
   boardsContainer.addEventListener('click', (event) => {
@@ -236,15 +229,13 @@
       if (isCrossMode && event.target.closest('.score-cell')) {
         const cell = event.target.closest('.score-cell');
         const boardId = cell.dataset.boardId;
-        const boardType = cell.dataset.boardType;
         const categoryId = cell.dataset.categoryId;
-        const context = getBoardContext(boardId, boardType);
-        if (context) {
-          const crossedMap = context.board.crossed ?? (context.board.crossed = createEmptyMarks());
+        const board = state.boards.find(b => b.id === boardId);
+        if (board) {
+          const crossedMap = board.crossed ?? (board.crossed = createEmptyMarks());
           crossedMap[categoryId] = !crossedMap[categoryId];
           if (crossedMap[categoryId]) {
-            // Si biffé, remettre entry à null
-            context.board.entries[categoryId] = null;
+            board.entries[categoryId] = null;
           }
           saveState();
           renderBoards();
@@ -255,15 +246,14 @@
       return;
     }
     const boardId = button.dataset.boardId;
-    const boardType = button.dataset.boardType ?? state.mode;
     const action = button.dataset.action;
 
-    if (!boardId || !boardType || !action) {
+    if (!boardId || !action) {
       return;
     }
 
-    const context = getBoardContext(boardId, boardType);
-    if (!context) {
+    const board = state.boards.find(b => b.id === boardId);
+    if (!board) {
       return;
     }
 
@@ -276,12 +266,11 @@
       if (!category || typeof category.fixedScore !== 'number') {
         return;
       }
-      const crossedMap = context.board.crossed ?? (context.board.crossed = createEmptyMarks());
+      const crossedMap = board.crossed ?? (board.crossed = createEmptyMarks());
       if (isCrossMode) {
-        // En mode biffure, toggle crossed au lieu de toggle fixed
         crossedMap[categoryId] = !crossedMap[categoryId];
         if (crossedMap[categoryId]) {
-          context.board.entries[categoryId] = null;
+          board.entries[categoryId] = null;
         }
         saveState();
         renderBoards();
@@ -290,12 +279,11 @@
         return;
       }
       if (crossedMap[categoryId]) {
-        // Si déjà biffé, débiffer
         crossedMap[categoryId] = false;
-        context.board.entries[categoryId] = null;
+        board.entries[categoryId] = null;
       } else {
-        const isActive = context.board.entries[categoryId] === category.fixedScore;
-        context.board.entries[categoryId] = isActive ? null : category.fixedScore;
+        const isActive = board.entries[categoryId] === category.fixedScore;
+        board.entries[categoryId] = isActive ? null : category.fixedScore;
       }
       saveState();
       renderBoards();
@@ -303,114 +291,7 @@
     }
   });
 
-  // Header buttons
-  document.addEventListener('click', (event) => {
-    const target = event.target;
-    console.log('[DEBUG] Click event:', { target: target.tagName, classes: target.className });
-    
-    if (!(target instanceof HTMLElement)) {
-      console.log('[DEBUG] Target is not an HTMLElement');
-      return;
-    }
-
-    const btn = target.closest('.header-btn, .editor-btn');
-    const editor = document.getElementById('column-editor');
-    
-    console.log('[DEBUG] Button found:', btn ? btn.dataset.action : 'none');
-    console.log('[DEBUG] Editor state:', editor ? (editor.hasAttribute('hidden') ? 'hidden' : 'visible') : 'not found');
-
-    // Si on clique sur un bouton avec une action
-    if (btn && btn.dataset.action) {
-      const action = btn.dataset.action;
-      console.log('[DEBUG] Action triggered:', action);
-
-      if (action === 'delete-tracks') {
-        console.log('[DEBUG] Executing delete-tracks');
-        editor.setAttribute('hidden', '');
-        if (confirm('Supprimer toutes les pistes ?')) {
-          state.boards.multipiste = [];
-          saveState();
-          render();
-        }
-        return;
-      }
-
-      if (action === 'reset-scores') {
-        console.log('[DEBUG] Executing reset-scores');
-        if (confirm('Vider toutes les grilles ?')) {
-          for (const collection of Object.values(state.boards)) {
-            collection.forEach(resetBoardEntries);
-          }
-          saveState();
-          renderBoards();
-        }
-        return;
-      }
-
-      if (action === 'add-track') {
-        console.log('[DEBUG] Executing add-track');
-        editor.setAttribute('hidden', '');
-        state.boards.multipiste.push(createBoard(`J${state.boards.multipiste.length + 1}`, 'multipiste'));
-        saveState();
-        renderBoards();
-        return;
-      }
-
-      if (action === 'add-three-tracks') {
-        console.log('[DEBUG] Executing add-three-tracks');
-        editor.setAttribute('hidden', '');
-        if (confirm('Cela supprimera toutes les pistes actuelles et ajoutera les trois pistes classiques. Continuer ?')) {
-          state.boards.multipiste = ['Montée', 'Descente', 'Libre'].map((name) => createBoard(name, 'multipiste'));
-          saveState();
-          render();
-        }
-        return;
-      }
-
-      if (action === 'add-four-tracks') {
-        console.log('[DEBUG] Executing add-four-tracks');
-        editor.setAttribute('hidden', '');
-        if (confirm('Cela supprimera toutes les pistes actuelles et ajoutera les quatre pistes classiques. Continuer ?')) {
-          state.boards.multipiste = ['Montée', 'Descente', 'Libre', 'Premier'].map((name) => createBoard(name, 'multipiste'));
-          saveState();
-          render();
-        }
-        return;
-      }
-
-      if (action === 'toggle-cross-mode') {
-        console.log('[DEBUG] Executing toggle-cross-mode');
-        isCrossMode = !isCrossMode;
-        btn.classList.toggle('active', isCrossMode);
-        return;
-      }
-
-      if (action === 'edit-columns') {
-        console.log('[DEBUG] Executing edit-columns');
-        const isHidden = editor.hasAttribute('hidden');
-        console.log('[DEBUG] Editor was:', isHidden ? 'hidden' : 'visible');
-        if (isHidden) {
-          editor.removeAttribute('hidden');
-          console.log('[DEBUG] Editor now visible');
-        } else {
-          editor.setAttribute('hidden', '');
-          console.log('[DEBUG] Editor now hidden');
-        }
-        return;
-      }
-    }
-
-    // Si on clique ailleurs (pas sur un bouton), fermer l'éditeur si ouvert
-    const clickedInEditor = target.closest('#column-editor');
-    if (!clickedInEditor && !editor.hasAttribute('hidden')) {
-      editor.setAttribute('hidden', '');
-    }
-  });
-
   function render() {
-    modeSelect.value = state.mode;
-    multiplayerControls.hidden = state.mode !== 'multiplayer';
-    multipisteControls.hidden = state.mode !== 'multipiste';
     renderBoards();
   }
 
@@ -418,17 +299,16 @@
     const previousScrollLeft = boardsContainer.scrollLeft;
     const previousScrollTop = boardsContainer.scrollTop;
     boardsContainer.innerHTML = '';
-    const boards = state.boards[state.mode];
-    if (!boards.length) {
-      boardsContainer.appendChild(createEmptyState(state.mode));
+    if (!state.boards.length) {
+      boardsContainer.appendChild(createEmptyState());
       return;
     }
-    boardsContainer.appendChild(createScoreGrid(boards));
+    boardsContainer.appendChild(createScoreGrid(state.boards));
     boardsContainer.scrollLeft = previousScrollLeft;
     boardsContainer.scrollTop = previousScrollTop;
   }
 
-  function createEmptyState(mode) {
+  function createEmptyState() {
     const message = 'Ajoutez vos pistes pour commencer.'
     const wrapper = document.createElement('div');
     wrapper.className = 'empty-state';
@@ -451,7 +331,6 @@
     const categoryHeader = document.createElement('th');
     categoryHeader.scope = 'col';
     categoryHeader.className = 'category-header';
-    // categoryHeader.textContent = 'Catégorie';
     headerRow.appendChild(categoryHeader);
 
     boards.forEach((board) => {
@@ -493,23 +372,6 @@
 
     const block = document.createElement('div');
     block.className = 'board-header-block';
-
-    const initials = document.createElement('span');
-    initials.className = 'board-initials';
-    initials.dataset.boardId = board.id;
-    initials.dataset.boardLabel = 'initials';
-    initials.textContent = getBoardInitials(board.name);
-    initials.title = board.name;
-    initials.style.cursor = 'pointer';
-    initials.addEventListener('click', () => {
-      const newName = prompt('Nouveau nom:', board.name);
-      if (newName && newName.trim()) {
-        board.name = newName.trim();
-        saveState();
-        renderBoards();
-      }
-    });
-    // block.appendChild(initials);
 
     const fullName = document.createElement('span');
     fullName.className = 'board-full-name';
@@ -574,7 +436,6 @@
     const cell = document.createElement('td');
     cell.className = 'score-cell';
     cell.dataset.boardId = board.id;
-    cell.dataset.boardType = board.type;
     cell.dataset.categoryId = category.id;
     const isFixed = typeof category.fixedScore === 'number';
     const crossedMap = board.crossed ?? (board.crossed = createEmptyMarks());
@@ -593,9 +454,8 @@
       toggle.className = 'score-fixed-toggle';
       toggle.dataset.action = 'toggle-fixed';
       toggle.dataset.boardId = board.id;
-      toggle.dataset.boardType = board.type;
       toggle.dataset.categoryId = category.id;
-      const isActive = value === category.fixedScore; // Removed crossed check
+      const isActive = value === category.fixedScore;
       toggle.textContent = isActive ? String(category.fixedScore) : '\u00A0';
       toggle.setAttribute('aria-pressed', isActive ? 'true' : 'false');
       if (isActive) {
@@ -615,7 +475,6 @@
       input.className = 'score-input';
       input.value = value ?? '';
       input.dataset.boardId = board.id;
-      input.dataset.boardType = board.type;
       input.dataset.categoryId = category.id;
       if (isCrossed) {
         input.readOnly = true;
@@ -634,8 +493,6 @@
     let rowClass = `score-row totals-row`;
     if (isBonus) {
       rowClass += ' totals-row-bonus';
-    } else if (key === 'bonusAdvance') {
-      rowClass += ' totals-row-advance';
     }
     row.className = rowClass;
 
@@ -690,7 +547,6 @@
     const bonus = upper >= 63 ? 35 : 0;
     const upperWithBonus = upper + bonus;
     const grand = upperWithBonus + lower;
-    // For bonus status
     let bonusStatus;
     if (!isUpperComplete) {
       bonusStatus = { type: 'advance', value: bonusAdvance };
@@ -740,18 +596,6 @@
     }
   }
 
-  function getBoardContext(boardId, boardType) {
-    const collection = state.boards[boardType];
-    if (!Array.isArray(collection)) {
-      return null;
-    }
-    const index = collection.findIndex((board) => board.id === boardId);
-    if (index === -1) {
-      return null;
-    }
-    return { collection, board: collection[index], index };
-  }
-
   function resetBoardEntries(board) {
     ALL_CATEGORIES.forEach((category) => {
       board.entries[category.id] = null;
@@ -786,27 +630,13 @@
 
   function createDefaultState() {
     return {
-      mode: 'multiplayer',
-      boards: {
-        multiplayer: [createBoard('Joueur 1', 'multiplayer')],
-        multipiste: DEFAULT_TRACKS.map((name) => createBoard(name, 'multipiste'))
-      }
+      boards: DEFAULT_TRACKS.map((name) => createBoard(name))
     };
   }
 
-  function ensureDefaultBoards() {
-    if (!state.boards.multiplayer.length) {
-      state.boards.multiplayer.push(createBoard(`Joueur ${state.boards.multiplayer.length + 1}`, 'multiplayer'));
-    }
-    if (!state.boards.multipiste.length) {
-      state.boards.multipiste = DEFAULT_TRACKS.map((name) => createBoard(name, 'multipiste'));
-    }
-  }
-
-  function createBoard(name, type) {
+  function createBoard(name) {
     return {
       id: generateId(),
-      type,
       name,
       entries: createEmptyEntries(),
       crossed: createEmptyMarks(),
@@ -832,20 +662,6 @@
     return `board-${Math.random().toString(16).slice(2)}-${Date.now()}`;
   }
 
-  function getBoardInitials(name) {
-    const safeName = typeof name === 'string' ? name.trim() : '';
-    if (!safeName) {
-      return '?';
-    }
-    const tokens = safeName.split(/\s+/).filter(Boolean);
-    let initials = tokens.map((token) => token[0]).join('');
-    if (!initials) {
-      initials = safeName.slice(0, 2);
-    }
-    initials = initials.slice(0, 3).toUpperCase();
-    return initials || '?';
-  }
-
   function loadState() {
     if (!storageAvailable) {
       return null;
@@ -859,19 +675,10 @@
       if (!parsed || typeof parsed !== 'object') {
         return null;
       }
-      const mode = parsed.mode === 'multipiste' ? 'multipiste' : 'multiplayer';
-      const boards = {
-        multiplayer: Array.isArray(parsed.boards?.multiplayer)
-          ? parsed.boards.multiplayer.map((board, index) => sanitizeBoard(board, `Joueur ${index + 1}`, 'multiplayer'))
-          : [],
-        multipiste: Array.isArray(parsed.boards?.multipiste)
-          ? parsed.boards.multipiste.map((board, index) => {
-            const fallback = DEFAULT_TRACKS[index] ?? `Piste ${index + 1}`;
-            return sanitizeBoard(board, fallback, 'multipiste');
-          })
-          : []
-      };
-      return { mode, boards };
+      const boards = Array.isArray(parsed.boards)
+        ? parsed.boards.map((board, index) => sanitizeBoard(board, `J${index + 1}`))
+        : [];
+      return { boards };
     } catch (error) {
       console.warn('Impossible de charger les scores précédents :', error);
       return null;
@@ -883,20 +690,16 @@
       return;
     }
     try {
-      const payload = JSON.stringify({
-        mode: state.mode,
-        boards: state.boards
-      });
+      const payload = JSON.stringify({ boards: state.boards });
       window.localStorage.setItem(STORAGE_KEY, payload);
     } catch (error) {
       console.warn('Impossible de sauvegarder les scores :', error);
     }
   }
 
-  function sanitizeBoard(raw, fallbackName, enforcedType) {
+  function sanitizeBoard(raw, fallbackName) {
     const sanitized = {
       id: typeof raw?.id === 'string' ? raw.id : generateId(),
-      type: enforcedType,
       name: typeof raw?.name === 'string' && raw.name.trim() ? raw.name.trim() : fallbackName,
       entries: createEmptyEntries(),
       crossed: createEmptyMarks(),

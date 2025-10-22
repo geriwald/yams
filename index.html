@@ -8,7 +8,7 @@
   </head>
   <body>
     <header class="app-header">
-      <h1>Compteur Yams</h1>
+      <h1>Feuille de score Yams</h1>
       <div class="header-buttons">
         <button type="button" class="header-btn" data-action="reset-scores" title="Vider la grille">Vider</button>
         <button type="button" class="header-btn" data-action="toggle-cross-mode" title="Biffer une case">Biffer</button>
@@ -23,35 +23,10 @@
    
     </header>
     <main class="app-main">
-      <section class="panel controls" id="controls-panel" aria-label="Contrôles principaux" hidden>
-        <div class="mode-toggle">
-          <label for="mode-select">Mode</label>
-          <select id="mode-select" class="input">
-            <option value="multiplayer">Multijoueur</option>
-            <option value="multipiste">Multipiste</option>
-          </select>
-        </div>
-        <div id="multiplayer-controls" class="mode-controls" hidden>
-          <form id="add-player-form" class="inline-form" autocomplete="off">
-            <label class="sr-only" for="player-name">Nom du joueur</label>
-            <input id="player-name" name="player-name" class="input" placeholder="Nom du joueur" required>
-            <button type="submit" class="button primary">Ajouter un joueur</button>
-          </form>
-        </div>
-        <div id="multipiste-controls" class="mode-controls" hidden>
-          <form id="add-track-form" class="inline-form" autocomplete="off">
-            <label class="sr-only" for="track-name">Nom de la piste</label>
-            <input id="track-name" name="track-name" class="input" placeholder="Nouvelle piste">
-            <button type="submit" class="button primary">Ajouter une piste</button>
-          </form>
-          <button type="button" class="button ghost" id="restore-default-tracks">Restaurer les pistes classiques</button>
-        </div>
-        <button type="button" class="button danger" id="reset-all">Réinitialiser toutes les grilles</button>
-      </section>
       <section id="boards" class="boards" aria-live="polite"></section>
     </main>
     <footer class="app-footer">
-      <small>© 2025 Hubac Family • v2.2-debug</small>
+      <small>© 2025 Hubac Family • v3.1</small>
     </footer>
     <script src="assets/app.js" defer></script>
   </body>
