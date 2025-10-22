@@ -352,8 +352,7 @@
       tbody.appendChild(createCategoryDataRow(category, boards));
     });
     tbody.appendChild(createTotalsDataRow('Somme supérieure', 'upper', boards, totalsByBoard));
-    tbody.appendChild(createTotalsDataRow('Avance', 'bonusAdvance', boards, totalsByBoard));
-    tbody.appendChild(createTotalsDataRow('Bonus (≥ 63)', 'bonus', boards, totalsByBoard, true));
+    tbody.appendChild(createTotalsDataRow('Bonus (≥ 63)', 'bonusStatus', boards, totalsByBoard, true));
     tbody.appendChild(createTotalsDataRow('Total supérieur', 'upperWithBonus', boards, totalsByBoard));
 
     tbody.appendChild(createSectionRow('Section inférieure', boards.length + 1));
@@ -471,7 +470,7 @@
       toggle.dataset.boardType = board.type;
       toggle.dataset.categoryId = category.id;
       const isActive = value === category.fixedScore; // Removed crossed check
-      toggle.textContent = isActive ? String(category.fixedScore) : '';
+      toggle.textContent = isActive ? String(category.fixedScore) : '\u00A0';
       toggle.setAttribute('aria-pressed', isActive ? 'true' : 'false');
       if (isActive) {
         toggle.classList.add('active');
@@ -529,13 +528,11 @@
       value.dataset.total = key;
       value.dataset.boardId = board.id;
       const totals = totalsByBoard[board.id];
-      let displayValue = totals[key];
-      if (key === 'bonusAdvance') {
-        displayValue = displayValue > 0 ? `+${displayValue}` : displayValue;
-      }
-      value.textContent = displayValue;
-      if (key === 'bonus' && totals[key] === 0) {
-        value.classList.add('bonus-zero');
+      if (key === 'bonusStatus') {
+        const status = totals.bonusStatus;
+        renderBonusStatus(value, status, board);
+      } else {
+        renderTotalValue(value, key, totals[key]);
       }
       cell.appendChild(value);
       row.appendChild(cell);
@@ -557,11 +554,59 @@
       const score = entries[category.id];
       return total + (score != null ? score - 3 * category.number : 0);
     }, 0);
+    const isUpperComplete = UPPER_CATEGORIES.every(cat => entries[cat.id] != null);
     const lower = LOWER_CATEGORIES.reduce((total, category) => total + (entries[category.id] ?? 0), 0);
     const bonus = upper >= 63 ? 35 : 0;
     const upperWithBonus = upper + bonus;
     const grand = upperWithBonus + lower;
-    return { upper, bonusAdvance, lower, bonus, upperWithBonus, grand };
+    // For bonus status
+    let bonusStatus;
+    if (!isUpperComplete) {
+      bonusStatus = { type: 'advance', value: bonusAdvance };
+    } else {
+      bonusStatus = { type: 'final', value: bonus > 0 };
+    }
+    return { upper, bonusAdvance, lower, bonus, upperWithBonus, grand, bonusStatus };
+  }
+
+  function computeMaxRemainingAdvance(board) {
+    const remainingCats = UPPER_CATEGORIES.filter(cat => board.entries[cat.id] == null);
+    return remainingCats.reduce((sum, cat) => sum + 2 * cat.number, 0);
+  }
+
+  function renderBonusStatus(element, status, board) {
+    element.style.color = '';
+    if (status.type === 'advance') {
+      if (status.value === 0 && UPPER_CATEGORIES.every(cat => board.entries[cat.id] == null)) {
+        element.textContent = '';
+      } else {
+        element.textContent = status.value > 0 ? `+${status.value}` : status.value;
+        if (status.value > 0) {
+          element.style.color = 'green';
+        } else {
+          const maxRemainingAdvance = computeMaxRemainingAdvance(board);
+          if (status.value + maxRemainingAdvance >= 0) {
+            element.style.color = 'orange';
+          } else {
+            element.style.color = 'red';
+          }
+        }
+      }
+    } else {
+      element.textContent = status.value ? '✓' : '✗';
+      element.style.color = status.value ? 'green' : 'red';
+    }
+  }
+
+  function renderTotalValue(element, key, value) {
+    let displayValue = value;
+    if (key === 'bonusAdvance') {
+      displayValue = value > 0 ? `+${value}` : value;
+    }
+    element.textContent = displayValue;
+    if (key === 'bonus') {
+      element.classList.toggle('bonus-zero', value === 0);
+    }
   }
 
   function getBoardContext(boardId, boardType) {
@@ -594,17 +639,16 @@
       bonus: totals.bonus,
       upperWithBonus: totals.upperWithBonus,
       lower: totals.lower,
-      grand: totals.grand
+      grand: totals.grand,
+      bonusStatus: totals.bonusStatus
     };
     Object.entries(totalMap).forEach(([key, value]) => {
       boardsContainer.querySelectorAll(`[data-total="${key}"][data-board-id="${board.id}"]`).forEach((target) => {
-        let displayValue = value;
-        if (key === 'bonusAdvance') {
-          displayValue = value > 0 ? `+${value}` : value;
-        }
-        target.textContent = displayValue;
-        if (key === 'bonus') {
-          target.classList.toggle('bonus-zero', value === 0);
+        if (key === 'bonusStatus') {
+          const status = value;
+          renderBonusStatus(target, status, board);
+        } else {
+          renderTotalValue(target, key, value);
         }
       });
     });
