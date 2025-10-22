@@ -342,7 +342,6 @@
 
     const tbody = document.createElement('tbody');
 
-    tbody.appendChild(createSectionRow('Section supérieure', boards.length + 1));
     UPPER_CATEGORIES.forEach((category) => {
       tbody.appendChild(createCategoryDataRow(category, boards));
     });
@@ -350,7 +349,7 @@
     tbody.appendChild(createTotalsDataRow('Bonus (≥ 63)', 'bonusStatus', boards, totalsByBoard, true));
     tbody.appendChild(createTotalsDataRow('Total supérieur', 'upperWithBonus', boards, totalsByBoard));
 
-    tbody.appendChild(createSectionRow('Section inférieure', boards.length + 1));
+    tbody.appendChild(createSectionRow('', boards.length + 1));
     LOWER_CATEGORIES.forEach((category) => {
       tbody.appendChild(createCategoryDataRow(category, boards));
     });
