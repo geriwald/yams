@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = 'v3.2';
+  const APP_VERSION = 'v3.3';
 
   const UPPER_CATEGORIES = [
     { id: 'ones', label: 'As', hint: 'Total des dés à 1', number: 1 },
@@ -526,7 +526,7 @@
       input.placeholder = '';
       input.autocomplete = 'off';
       input.className = 'score-input';
-      input.value = value ?? '';
+      input.value = value === 0 ? '' : (value ?? '');
       input.dataset.boardId = board.id;
       input.dataset.categoryId = category.id;
       if (isCrossed) {
@@ -641,7 +641,16 @@
   function renderTotalValue(element, key, value) {
     let displayValue = value;
     if (key === 'bonusAdvance') {
-      displayValue = value > 0 ? `+${value}` : value;
+      if (value > 0) {
+        displayValue = `+${value}`;
+      } else if (value === 0) {
+        displayValue = '';
+      }
+    } else if (value === 0) {
+      displayValue = '';
+    }
+    if (displayValue == null) {
+      displayValue = '';
     }
     element.textContent = displayValue;
     if (key === 'bonus') {
@@ -688,7 +697,7 @@
       }, 0);
       const globalCell = boardsContainer.querySelector('.global-total-cell .total-value');
       if (globalCell) {
-        globalCell.textContent = globalTotal;
+        globalCell.textContent = globalTotal === 0 ? '' : String(globalTotal);
       }
     }
   }
@@ -811,7 +820,7 @@
     totalCell.colSpan = boards.length;
     const value = document.createElement('span');
     value.className = 'total-value';
-    value.textContent = globalTotal;
+    value.textContent = globalTotal === 0 ? '' : String(globalTotal);
     totalCell.appendChild(value);
     row.appendChild(totalCell);
 
