@@ -15,7 +15,7 @@
   const LOWER_CATEGORIES = [
     { id: 'threeKind', label: 'Brelan', hint: 'Somme des dés identiques si plus de 3' },
     { id: 'fourKind', label: 'Carré', hint: 'Somme des dés identiques si plus de 4' },
-    { id: 'fullHouse', label: 'Full', hint: '25 points', fixedScore: 25 },
+    { id: 'fullHouse', label: 'Full House', hint: '25 points', fixedScore: 25 },
     { id: 'smallStraight', label: 'Petite suite', hint: '30 points', fixedScore: 30 },
     { id: 'largeStraight', label: 'Grande suite', hint: '40 points', fixedScore: 40 },
     { id: 'yahtzee', label: 'Yams', hint: '50 points', fixedScore: 50 },
@@ -394,10 +394,11 @@
 
     const tbody = document.createElement('tbody');
 
+    // tbody.appendChild(createSectionRow('', boards.length + 1));
     UPPER_CATEGORIES.forEach((category) => {
       tbody.appendChild(createCategoryDataRow(category, boards));
     });
-    tbody.appendChild(createTotalsDataRow('Somme supérieure', 'upper', boards, totalsByBoard));
+    tbody.appendChild(createTotalsDataRow('Score', 'upper', boards, totalsByBoard));
     tbody.appendChild(createTotalsDataRow('Bonus (≥ 63)', 'bonusStatus', boards, totalsByBoard, true));
     tbody.appendChild(createTotalsDataRow('Total supérieur', 'upperWithBonus', boards, totalsByBoard));
 
@@ -406,7 +407,8 @@
       tbody.appendChild(createCategoryDataRow(category, boards));
     });
     tbody.appendChild(createTotalsDataRow('Total inférieur', 'lower', boards, totalsByBoard));
-    tbody.appendChild(createTotalsDataRow('Total général', 'grand', boards, totalsByBoard));
+    tbody.appendChild(createSectionRow('', boards.length + 1));
+    tbody.appendChild(createTotalsDataRow('Total', 'grand', boards, totalsByBoard));
     if (boards.length > 1) {
       tbody.appendChild(createGlobalTotalRow(boards, totalsByBoard));
     }
@@ -551,7 +553,7 @@
 
     const headerCell = document.createElement('th');
     headerCell.scope = 'row';
-    headerCell.className = 'category-cell';
+    headerCell.className = 'total-cell';
     headerCell.textContent = label;
     row.appendChild(headerCell);
 
@@ -809,8 +811,8 @@
 
     const headerCell = document.createElement('th');
     headerCell.scope = 'row';
-    headerCell.className = 'category-cell';
-    headerCell.textContent = 'Total global';
+    headerCell.className = 'total-cell';
+    headerCell.textContent = 'Somme des pistes';
     row.appendChild(headerCell);
 
     const globalTotal = boards.reduce((sum, board) => sum + (totalsByBoard[board.id].grand || 0), 0);

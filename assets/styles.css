@@ -241,7 +241,7 @@ body {
 .score-grid-table {
   width: 100%;
   border-collapse: collapse;
-  background: rgba(15, 23, 42, 0.6);
+  /* background: rgba(15, 23, 42, 0.6); */
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: visible;
@@ -454,6 +454,7 @@ body {
 }
 
 .total-cell {
+  background: rgba(11, 17, 31, 0.92);
   text-align: center;
 }
 
