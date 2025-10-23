@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = 'v3.1';
+  const APP_VERSION = 'v3.2';
 
   const UPPER_CATEGORIES = [
     { id: 'ones', label: 'As', hint: 'Total des dés à 1', number: 1 },
@@ -43,6 +43,7 @@
   })();
 
   const boardsContainer = document.querySelector('#boards');
+  const crossModeToggleButton = document.querySelector('[data-action="toggle-cross-mode"]');
 
   console.log(`Yams Scorekeeper ${APP_VERSION}`);
 
@@ -119,8 +120,7 @@
       }
 
       if (action === 'toggle-cross-mode') {
-        isCrossMode = !isCrossMode;
-        btn.classList.toggle('active', isCrossMode);
+        setCrossMode(!isCrossMode);
         return;
       }
 
@@ -248,8 +248,7 @@
           }
           saveState();
           renderBoards();
-          isCrossMode = false;
-          document.querySelector('[data-action="toggle-cross-mode"]').classList.remove('active');
+          setCrossMode(false);
         }
       }
       return;
@@ -283,8 +282,7 @@
         }
         saveState();
         renderBoards();
-        isCrossMode = false;
-        document.querySelector('[data-action="toggle-cross-mode"]').classList.remove('active');
+        setCrossMode(false);
         return;
       }
       if (crossedMap[categoryId]) {
@@ -299,6 +297,13 @@
       return;
     }
   });
+
+  function setCrossMode(active) {
+    isCrossMode = !!active;
+    if (crossModeToggleButton) {
+      crossModeToggleButton.classList.toggle('active', isCrossMode);
+    }
+  }
 
   function render() {
     renderBoards();
@@ -731,13 +736,22 @@
     const sourceCrossed = raw?.crossed ?? {};
     ALL_CATEGORIES.forEach((category) => {
       const value = sourceEntries[category.id];
-      const numeric = Number(value);
       if (sourceCrossed[category.id]) {
         sanitized.entries[category.id] = null;
         sanitized.crossed[category.id] = true;
         return;
       }
-      sanitized.entries[category.id] = Number.isFinite(numeric) && numeric > 0 ? Math.min(999, Math.round(numeric)) : null;
+      if (typeof value === 'string' && value.trim() === '') {
+        sanitized.entries[category.id] = null;
+        return;
+      }
+      const numeric = Number(value);
+      if (Number.isFinite(numeric) && numeric >= 0) {
+        const normalized = Math.min(999, Math.max(0, Math.round(numeric)));
+        sanitized.entries[category.id] = normalized;
+      } else {
+        sanitized.entries[category.id] = null;
+      }
     });
     return sanitized;
   }
