@@ -48,6 +48,13 @@
 
   let state = loadState() ?? createDefaultState();
   let isCrossMode = false;
+
+  // Afficher la version dans le footer
+  const versionElement = document.getElementById('app-version');
+  if (versionElement) {
+    versionElement.textContent = APP_VERSION;
+  }
+
   render();
 
   // Header buttons
