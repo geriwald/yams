@@ -43,7 +43,7 @@
   })();
 
   const boardsContainer = document.querySelector('#boards');
-  const crossModeToggleButton = document.querySelector('[data-action="toggle-cross-mode"]');
+  let crossModeToggleButton = document.querySelector('[data-action="toggle-cross-mode"]');
 
   console.log(`Yams Scorekeeper ${APP_VERSION}`);
 
@@ -120,7 +120,7 @@
       }
 
       if (action === 'toggle-cross-mode') {
-        setCrossMode(!isCrossMode);
+        setCrossMode(!isCrossMode, btn);
         return;
       }
 
@@ -298,10 +298,16 @@
     }
   });
 
-  function setCrossMode(active) {
+  function setCrossMode(active, sourceButton) {
     isCrossMode = !!active;
-    if (crossModeToggleButton) {
-      crossModeToggleButton.classList.toggle('active', isCrossMode);
+    if (sourceButton instanceof HTMLElement) {
+      crossModeToggleButton = sourceButton;
+    } else if (!crossModeToggleButton || !crossModeToggleButton.isConnected) {
+      crossModeToggleButton = document.querySelector('[data-action="toggle-cross-mode"]');
+    }
+    const targetButton = crossModeToggleButton;
+    if (targetButton) {
+      targetButton.classList.toggle('active', isCrossMode);
     }
   }
 
