@@ -312,6 +312,22 @@
   function renderBoards() {
     const previousScrollLeft = boardsContainer.scrollLeft;
     const previousScrollTop = boardsContainer.scrollTop;
+    const activeElement = document.activeElement;
+    const focusInfo = (() => {
+      if (
+        activeElement instanceof HTMLInputElement &&
+        activeElement.classList.contains('score-input') &&
+        boardsContainer.contains(activeElement)
+      ) {
+        return {
+          boardId: activeElement.dataset.boardId,
+          categoryId: activeElement.dataset.categoryId,
+          selectionStart: activeElement.selectionStart,
+          selectionEnd: activeElement.selectionEnd
+        };
+      }
+      return null;
+    })();
     boardsContainer.innerHTML = '';
     if (!state.boards.length) {
       boardsContainer.appendChild(createEmptyState());
@@ -320,6 +336,22 @@
     boardsContainer.appendChild(createScoreGrid(state.boards));
     boardsContainer.scrollLeft = previousScrollLeft;
     boardsContainer.scrollTop = previousScrollTop;
+    if (focusInfo?.boardId && focusInfo?.categoryId) {
+      const selector = `.score-input[data-board-id="${focusInfo.boardId}"][data-category-id="${focusInfo.categoryId}"]`;
+      const nextInput = boardsContainer.querySelector(selector);
+      if (nextInput instanceof HTMLInputElement && !nextInput.readOnly && !nextInput.disabled) {
+        nextInput.focus();
+        if (
+          typeof focusInfo.selectionStart === 'number' &&
+          typeof focusInfo.selectionEnd === 'number'
+        ) {
+          nextInput.setSelectionRange(focusInfo.selectionStart, focusInfo.selectionEnd);
+        } else {
+          const cursor = nextInput.value.length;
+          nextInput.setSelectionRange(cursor, cursor);
+        }
+      }
+    }
   }
 
   function createEmptyState() {
