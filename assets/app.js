@@ -586,10 +586,11 @@
   }
 
   function computeTotals(entries, crossed) {
+    const crossedMap = crossed || {};
     const upper = UPPER_CATEGORIES.reduce((total, category) => total + (entries[category.id] ?? 0), 0);
     const bonusAdvance = UPPER_CATEGORIES.reduce((total, category) => {
       const score = entries[category.id];
-      if (crossed[category.id]) {
+      if (crossedMap[category.id]) {
         return total - 3 * category.number;
       } else if (score != null) {
         return total + score - 3 * category.number;
@@ -597,7 +598,7 @@
         return total;
       }
     }, 0);
-    const isUpperComplete = UPPER_CATEGORIES.every(cat => entries[cat.id] != null || crossed[cat.id]);
+    const isUpperComplete = UPPER_CATEGORIES.every(cat => entries[cat.id] != null || crossedMap[cat.id]);
     const lower = LOWER_CATEGORIES.reduce((total, category) => total + (entries[category.id] ?? 0), 0);
     const bonus = upper >= 63 ? 35 : 0;
     const upperWithBonus = upper + bonus;
@@ -612,7 +613,8 @@
   }
 
   function computeMaxRemainingAdvance(board) {
-    const remainingCats = UPPER_CATEGORIES.filter(cat => board.entries[cat.id] == null && !board.crossed[cat.id]);
+    const crossedMap = board.crossed || {};
+    const remainingCats = UPPER_CATEGORIES.filter(cat => board.entries[cat.id] == null && !crossedMap[cat.id]);
     return remainingCats.reduce((sum, cat) => sum + 2 * cat.number, 0);
   }
 
