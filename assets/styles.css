@@ -32,6 +32,15 @@ body {
   padding: 0;
 }
 
+.app-container {
+  flex: 1;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -541,9 +550,9 @@ body {
     padding: 8px;
   }
 
-    .score-grid-table th {
+  .score-grid-table th {
     padding: 4px 2px;
-    }
+  }
 
   .score-grid-table td {
     padding: 2px 2px;

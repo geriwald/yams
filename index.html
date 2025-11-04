@@ -7,24 +7,26 @@
     <link rel="stylesheet" href="assets/styles.css">
   </head>
   <body>
-    <header class="app-header">
-      <h1>Feuille de Yams</h1>
-      <div class="header-buttons">
-        <button type="button" class="header-btn" data-action="reset-scores" title="Vider la grille">Vider</button>
-        <button type="button" class="header-btn" data-action="toggle-cross-mode" title="Biffer une case">Biffer</button>
-        <button type="button" class="header-btn" data-action="edit-columns" title="Éditer les colonnes">Pistes</button>
-      </div>
-      <div class="column-editor" id="column-editor" hidden>
-        <button type="button" class="editor-btn" data-action="delete-tracks">Supprimer les pistes</button>
-        <button type="button" class="editor-btn" data-action="add-track">Ajouter un joueur</button>
-        <button type="button" class="editor-btn" data-action="add-three-tracks">Yams trois pistes</button>
-        <button type="button" class="editor-btn" data-action="add-four-tracks">Yams quatre pistes</button>
-      </div>
-   
-    </header>
-    <main class="app-main">
-      <section id="boards" class="boards" aria-live="polite"></section>
-    </main>
+    <div class="app-container">
+      <header class="app-header">
+        <h1>Feuille de Yams</h1>
+        <div class="header-buttons">
+          <button type="button" class="header-btn" data-action="reset-scores" title="Vider la grille">Vider</button>
+          <button type="button" class="header-btn" data-action="toggle-cross-mode" title="Biffer une case">Biffer</button>
+          <button type="button" class="header-btn" data-action="edit-columns" title="Éditer les colonnes">Pistes</button>
+        </div>
+        <div class="column-editor" id="column-editor" hidden>
+          <button type="button" class="editor-btn" data-action="delete-tracks">Supprimer les pistes</button>
+          <button type="button" class="editor-btn" data-action="add-track">Ajouter un joueur</button>
+          <button type="button" class="editor-btn" data-action="add-three-tracks">Yams trois pistes</button>
+          <button type="button" class="editor-btn" data-action="add-four-tracks">Yams quatre pistes</button>
+        </div>
+     
+      </header>
+      <main class="app-main">
+        <section id="boards" class="boards" aria-live="polite"></section>
+      </main>
+    </div>
     <footer class="app-footer">
       <small>© 2025 Hubac Family • <span id="app-version"></span></small>
     </footer>
