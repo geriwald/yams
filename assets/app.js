@@ -309,6 +309,9 @@
     if (targetButton) {
       targetButton.classList.toggle('active', isCrossMode);
     }
+    if (document.body) {
+      document.body.classList.toggle('cross-mode-active', isCrossMode);
+    }
   }
 
   function render() {
