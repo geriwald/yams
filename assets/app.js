@@ -320,10 +320,9 @@
   function applyTheme(theme) {
     const normalized = theme === THEMES.DARK ? THEMES.DARK : THEMES.LIGHT;
     currentTheme = normalized;
-    const body = document.body;
-    if (body) {
-      body.classList.toggle('theme-dark', normalized === THEMES.DARK);
-      body.classList.toggle('theme-light', normalized !== THEMES.DARK);
+    const root = document.documentElement;
+    if (root) {
+      root.setAttribute('data-theme', normalized);
     }
     updateThemeToggleButton(normalized);
   }
