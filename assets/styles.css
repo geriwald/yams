@@ -353,7 +353,7 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 1.5em;
-  color: rgb(104, 15, 15);
+  color: #9ca3af;
   /* background: rgba(175, 54, 54, 0.7); */
   pointer-events: none;
   z-index: 1;
@@ -415,6 +415,12 @@ body {
 
 .score-cell .score-input {
   cursor: text;
+}
+
+body.cross-mode-active .score-cell,
+body.cross-mode-active .score-cell .score-input,
+body.cross-mode-active .score-cell .score-fixed-toggle {
+  cursor: crosshair;
 }
 
 
