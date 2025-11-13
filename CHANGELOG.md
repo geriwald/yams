@@ -144,8 +144,8 @@ Depuis le premier commit jusqu'à v3.1 :
 #### 2. Système de gestion multi-pistes
 - Support de plusieurs joueurs/pistes simultanés
 - Configurations prédéfinies :
-  - Trois pistes : Montée, Descente, Libre
-  - Quatre pistes : Montée, Descente, Libre, Premier
+  - Trois pistes : Descente, Montée, Libre
+  - Quatre pistes : Descente, Montée, Libre, Premier
 - Possibilité d'ajouter/supprimer des pistes individuellement
 - Renommage des pistes en cliquant sur l'en-tête
 

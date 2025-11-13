@@ -1,4 +1,8 @@
 :root {
+  --radius: 18px;
+  font-size: 16px;
+
+  /* Light theme defaults */
   --bg: #f8fafc;
   --bg-card: rgba(255, 255, 255, 0.92);
   --bg-muted: rgba(148, 163, 184, 0.2);
@@ -9,9 +13,76 @@
   --danger: #ef4444;
   --danger-muted: rgba(239, 68, 68, 0.12);
   --border: rgba(15, 23, 42, 0.12);
-  --radius: 18px;
   --shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
-  font-size: 16px;
+  --app-background: radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.18), transparent 45%),
+    radial-gradient(circle at 85% 10%, rgba(14, 165, 233, 0.18), transparent 40%),
+    radial-gradient(circle at 55% 80%, rgba(249, 168, 212, 0.3), transparent 45%),
+    var(--bg);
+  --header-hover-bg: rgba(37, 99, 235, 0.1);
+  --editor-hover-bg: rgba(37, 99, 235, 0.08);
+  --input-focus-bg: rgba(37, 99, 235, 0.12);
+  --button-primary-gradient: linear-gradient(135deg, #93c5fd, #2563eb);
+  --button-primary-color: #fff;
+  --button-primary-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+  --button-hover-shadow: 0 8px 20px rgba(37, 99, 235, 0.18);
+  --button-ghost-border: rgba(148, 163, 184, 0.4);
+  --table-header-bg: rgba(226, 232, 240, 0.9);
+  --table-border-color: rgba(148, 163, 184, 0.35);
+  --category-cell-bg: rgba(255, 255, 255, 0.95);
+  --section-cell-bg: rgba(237, 242, 247, 0.9);
+  --row-odd-bg: rgba(255, 255, 255, 0.98);
+  --row-even-bg: rgba(237, 242, 247, 0.9);
+  --tooltip-bg: #fff;
+  --tooltip-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  --focus-outline: rgba(37, 99, 235, 0.4);
+  --total-cell-bg: rgba(226, 232, 240, 0.9);
+  --totals-row-bg: rgba(241, 245, 249, 0.8);
+  --totals-bonus-bg: rgba(254, 249, 195, 0.6);
+  --totals-advance-bg: rgba(187, 247, 208, 0.6);
+  --totals-advance-color: #15803d;
+  --empty-state-bg: rgba(255, 255, 255, 0.85);
+  --empty-state-border: rgba(148, 163, 184, 0.6);
+}
+
+body.theme-dark {
+  --bg: #0f172a;
+  --bg-card: rgba(15, 23, 42, 0.85);
+  --bg-muted: rgba(148, 163, 184, 0.1);
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --accent: #22d3ee;
+  --accent-muted: rgba(34, 211, 238, 0.15);
+  --danger: #f87171;
+  --danger-muted: rgba(248, 113, 113, 0.15);
+  --border: rgba(148, 163, 184, 0.25);
+  --shadow: 0 12px 30px rgba(15, 23, 42, 0.35);
+  --app-background: radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.35), transparent 55%),
+    radial-gradient(circle at 90% 10%, rgba(14, 165, 233, 0.25), transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(236, 72, 153, 0.2), transparent 55%),
+    var(--bg);
+  --header-hover-bg: rgba(0, 0, 0, 0.1);
+  --editor-hover-bg: rgba(0, 0, 0, 0.1);
+  --input-focus-bg: rgba(34, 211, 238, 0.08);
+  --button-primary-gradient: linear-gradient(135deg, #38bdf8, #22d3ee);
+  --button-primary-color: #0f172a;
+  --button-primary-shadow: 0 6px 16px rgba(34, 211, 238, 0.35);
+  --button-hover-shadow: 0 8px 20px rgba(34, 211, 238, 0.2);
+  --table-header-bg: rgba(148, 163, 184, 0.12);
+  --table-border-color: rgba(148, 163, 184, 0.18);
+  --category-cell-bg: rgba(15, 23, 42, 0.92);
+  --section-cell-bg: rgba(148, 163, 184, 0.08);
+  --row-odd-bg: rgba(15, 23, 42, 0.55);
+  --row-even-bg: rgba(15, 23, 42, 0.4);
+  --tooltip-bg: rgba(15, 23, 42, 0.95);
+  --tooltip-shadow: 0 8px 24px rgba(15, 23, 42, 0.45);
+  --focus-outline: rgba(34, 211, 238, 0.6);
+  --total-cell-bg: rgba(11, 17, 31, 0.92);
+  --totals-row-bg: rgba(148, 163, 184, 0.06);
+  --totals-bonus-bg: rgba(248, 113, 113, 0.08);
+  --totals-advance-bg: rgba(248, 113, 113, 0.08);
+  --totals-advance-color: green;
+  --empty-state-bg: rgba(15, 23, 42, 0.4);
+  --empty-state-border: rgba(148, 163, 184, 0.25);
 }
 
 * {
@@ -21,10 +92,7 @@
 body {
   margin: 0;
   font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
-  background: radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.18), transparent 45%),
-    radial-gradient(circle at 85% 10%, rgba(14, 165, 233, 0.18), transparent 40%),
-    radial-gradient(circle at 55% 80%, rgba(249, 168, 212, 0.3), transparent 45%),
-    var(--bg);
+  background: var(--app-background);
   color: var(--text);
   min-height: 100vh;
   display: flex;
@@ -85,7 +153,7 @@ body {
 }
 
 .header-btn:hover {
-  background: rgba(37, 99, 235, 0.1);
+  background: var(--header-hover-bg);
 }
 
 .header-btn.active {
@@ -126,7 +194,7 @@ body {
 }
 
 .editor-btn:hover {
-  background: rgba(37, 99, 235, 0.08);
+  background: var(--editor-hover-bg);
 }
 
 .app-main {
@@ -191,7 +259,7 @@ body {
 
 .input:focus {
   border-color: var(--accent);
-  background: rgba(37, 99, 235, 0.12);
+  background: var(--input-focus-bg);
 }
 
 .button {
@@ -211,9 +279,9 @@ body {
 }
 
 .button.primary {
-  background: linear-gradient(135deg, #93c5fd, #2563eb);
-  color: #fff;
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+  background: var(--button-primary-gradient);
+  color: var(--button-primary-color);
+  box-shadow: var(--button-primary-shadow);
 }
 
 .button.danger {
@@ -223,13 +291,13 @@ body {
 
 .button.ghost {
   background: transparent;
-  border: 1px dashed rgba(148, 163, 184, 0.4);
+  border: 1px dashed var(--button-ghost-border);
   color: var(--text-muted);
 }
 
 .button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.18);
+  box-shadow: var(--button-hover-shadow);
 }
 
 .button:active {
@@ -257,7 +325,7 @@ body {
 }
 
 .score-grid-table thead th {
-  background: rgba(226, 232, 240, 0.9);
+  background: var(--table-header-bg);
   font-weight: 600;
   text-align: center;
   color: var(--text);
@@ -265,7 +333,7 @@ body {
 
 .score-grid-table th,
 .score-grid-table td {
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  border: 1px solid var(--table-border-color);
   padding: 0px;
   font-size: 0.85rem;
 }
@@ -281,7 +349,7 @@ body {
 .score-grid-table tbody .category-cell {
   position: sticky;
   left: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--category-cell-bg);
   text-align: left;
   font-weight: 500;
   color: var(--text);
@@ -289,7 +357,7 @@ body {
 }
 
 .section-row .section-cell {
-  background: rgba(237, 242, 247, 0.9);
+  background: var(--section-cell-bg);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.75rem;
@@ -330,11 +398,11 @@ body {
 }
 
 .score-row:nth-of-type(odd) .score-cell {
-  background: rgba(255, 255, 255, 0.98);
+  background: var(--row-odd-bg);
 }
 
 .score-row:nth-of-type(even) .score-cell {
-  background: rgba(237, 242, 247, 0.9);
+  background: var(--row-even-bg);
 }
 
 .score-cell-crossed {
@@ -441,11 +509,11 @@ body.cross-mode-active .score-cell .score-fixed-toggle {
   left: 50%;
   bottom: 120%;
   transform: translateX(-50%) scale(0.95);
-  background: #fff;
+  background: var(--tooltip-bg);
   color: var(--text);
   padding: 8px 10px;
   border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  box-shadow: var(--tooltip-shadow);
   font-size: 0.75rem;
   width: max(180px, 70%);
   max-width: 220px;
@@ -463,12 +531,12 @@ body.cross-mode-active .score-cell .score-fixed-toggle {
 }
 
 .category-button:focus-visible {
-  outline: 2px solid rgba(37, 99, 235, 0.4);
+  outline: 2px solid var(--focus-outline);
   outline-offset: 2px;
 }
 
 .total-cell {
-  background: rgba(226, 232, 240, 0.9);
+  background: var(--total-cell-bg);
   text-align: center;
 }
 
@@ -482,26 +550,26 @@ body.cross-mode-active .score-cell .score-fixed-toggle {
 }
 
 .totals-row {
-  background: rgba(241, 245, 249, 0.8);
+  background: var(--totals-row-bg);
 }
 
 .totals-row-bonus {
-  background: rgba(254, 249, 195, 0.6);
+  background: var(--totals-bonus-bg);
 }
 
 .totals-row-advance {
-  background: rgba(187, 247, 208, 0.6);
+  background: var(--totals-advance-bg);
 }
 
 .totals-row-advance .total-value {
-  color: #15803d;
+  color: var(--totals-advance-color);
 }
 
 .empty-state {
   text-align: center;
   padding: 40px 20px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px dashed rgba(148, 163, 184, 0.6);
+  background: var(--empty-state-bg);
+  border: 1px dashed var(--empty-state-border);
   border-radius: 16px;
   color: var(--text-muted);
   font-size: 1rem;

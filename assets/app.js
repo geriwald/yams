@@ -28,7 +28,12 @@
     return accumulator;
   }, Object.create(null));
   const STORAGE_KEY = 'yams-scorekeeper-v3';
-  const DEFAULT_TRACKS = ['Montée', 'Descente', 'Libre', 'Premier'];
+  const DEFAULT_TRACKS = ['Descente', 'Montée', 'Libre', 'Premier'];
+  const THEME_STORAGE_KEY = 'yams-scorekeeper-theme';
+  const THEMES = {
+    LIGHT: 'light',
+    DARK: 'dark'
+  };
 
   const storageAvailable = (() => {
     try {
@@ -49,6 +54,7 @@
 
   let state = loadState() ?? createDefaultState();
   let isCrossMode = false;
+  let currentTheme = loadThemePreference();
 
   // Afficher la version dans le footer
   const versionElement = document.getElementById('app-version');
@@ -56,6 +62,7 @@
     versionElement.textContent = APP_VERSION;
   }
 
+  applyTheme(currentTheme);
   render();
 
   // Header buttons
@@ -102,7 +109,7 @@
       if (action === 'add-three-tracks') {
         editor.setAttribute('hidden', '');
         if (confirm('Cela supprimera toutes les pistes actuelles et ajoutera les trois pistes classiques. Continuer ?')) {
-          state.boards = ['Montée', 'Descente', 'Libre'].map((name) => createBoard(name));
+          state.boards = ['Descente', 'Montée', 'Libre'].map((name) => createBoard(name));
           saveState();
           render();
         }
@@ -121,6 +128,12 @@
 
       if (action === 'toggle-cross-mode') {
         setCrossMode(!isCrossMode, btn);
+        return;
+      }
+
+      if (action === 'toggle-theme') {
+        const nextTheme = currentTheme === THEMES.DARK ? THEMES.LIGHT : THEMES.DARK;
+        setTheme(nextTheme);
         return;
       }
 
@@ -297,6 +310,58 @@
       return;
     }
   });
+
+  function setTheme(theme) {
+    const normalized = theme === THEMES.DARK ? THEMES.DARK : THEMES.LIGHT;
+    applyTheme(normalized);
+    saveThemePreference(normalized);
+  }
+
+  function applyTheme(theme) {
+    const normalized = theme === THEMES.DARK ? THEMES.DARK : THEMES.LIGHT;
+    currentTheme = normalized;
+    const body = document.body;
+    if (body) {
+      body.classList.toggle('theme-dark', normalized === THEMES.DARK);
+      body.classList.toggle('theme-light', normalized !== THEMES.DARK);
+    }
+    updateThemeToggleButton(normalized);
+  }
+
+  function updateThemeToggleButton(theme) {
+    const button = document.querySelector('[data-action="toggle-theme"]');
+    if (!button) {
+      return;
+    }
+    const isDark = theme === THEMES.DARK;
+    button.textContent = isDark ? 'Mode clair' : 'Mode sombre';
+    button.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+    button.setAttribute('title', isDark ? 'Passer en mode clair' : 'Passer en mode sombre');
+  }
+
+  function loadThemePreference() {
+    if (!storageAvailable) {
+      return THEMES.LIGHT;
+    }
+    try {
+      const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+      return stored === THEMES.DARK ? THEMES.DARK : THEMES.LIGHT;
+    } catch (error) {
+      console.warn('Impossible de charger le thème :', error);
+      return THEMES.LIGHT;
+    }
+  }
+
+  function saveThemePreference(theme) {
+    if (!storageAvailable) {
+      return;
+    }
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch (error) {
+      console.warn('Impossible de sauvegarder le thème :', error);
+    }
+  }
 
   function setCrossMode(active, sourceButton) {
     isCrossMode = !!active;
