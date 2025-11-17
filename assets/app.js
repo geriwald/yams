@@ -48,6 +48,7 @@
   })();
 
   const boardsContainer = document.querySelector('#boards');
+  const summaryContainer = document.querySelector('#game-summary');
   let crossModeToggleButton = document.querySelector('[data-action="toggle-cross-mode"]');
 
   console.log(`Yams Scorekeeper ${APP_VERSION}`);
@@ -90,7 +91,7 @@
         if (confirm('Vider toutes les grilles ?')) {
           state.boards.forEach(resetBoardEntries);
           saveState();
-          renderBoards();
+          render();
         }
         return;
       }
@@ -101,7 +102,7 @@
         if (name && name.trim()) {
           state.boards.push(createBoard(name.trim()));
           saveState();
-          renderBoards();
+          render();
         }
         return;
       }
@@ -175,6 +176,10 @@
     if (!board) {
       return;
     }
+    const category = CATEGORY_MAP[categoryId];
+    if (!category) {
+      return;
+    }
 
     const crossedMap = board.crossed ?? (board.crossed = createEmptyMarks());
     crossedMap[categoryId] = false;
@@ -189,6 +194,7 @@
       board.entries[categoryId] = null;
       saveState();
       updateBoardTotalsUI(board);
+      updateYamIndicator(board.id, categoryId);
       return;
     }
 
@@ -235,6 +241,7 @@
       input.classList.remove('invalid');
       saveState();
       updateBoardTotalsUI(board);
+      updateYamIndicator(board.id, categoryId);
       return;
     }
 
@@ -243,6 +250,7 @@
     input.classList.remove('invalid');
     saveState();
     updateBoardTotalsUI(board);
+    updateYamIndicator(board.id, categoryId);
   });
 
   boardsContainer.addEventListener('click', (event) => {
@@ -260,7 +268,7 @@
             board.entries[categoryId] = null;
           }
           saveState();
-          renderBoards();
+          render();
           setCrossMode(false);
         }
       }
@@ -294,7 +302,7 @@
           board.entries[categoryId] = null;
         }
         saveState();
-        renderBoards();
+        render();
         setCrossMode(false);
         return;
       }
@@ -306,7 +314,7 @@
         board.entries[categoryId] = isActive ? null : category.fixedScore;
       }
       saveState();
-      renderBoards();
+      render();
       return;
     }
   });
@@ -380,6 +388,7 @@
 
   function render() {
     renderBoards();
+    renderSummary();
   }
 
   function renderBoards() {
@@ -425,6 +434,52 @@
         }
       }
     }
+  }
+
+  function renderSummary() {
+    if (!summaryContainer) {
+      return;
+    }
+    summaryContainer.innerHTML = '';
+    const hasBoards = state.boards.length > 0;
+    const isComplete = hasBoards && state.boards.every(isBoardComplete);
+    if (!isComplete) {
+      summaryContainer.setAttribute('hidden', '');
+      return;
+    }
+    summaryContainer.removeAttribute('hidden');
+    const totalsByBoard = computeAllTotals(state.boards);
+    const heading = document.createElement('h2');
+    heading.textContent = 'Fin de partie';
+    summaryContainer.appendChild(heading);
+
+    const globalTotal = state.boards.reduce((sum, board) => sum + (totalsByBoard[board.id].grand || 0), 0);
+    const totalLine = document.createElement('p');
+    totalLine.className = 'game-summary-line';
+    totalLine.textContent = `Score cumulé : ${globalTotal} pts.`;
+    summaryContainer.appendChild(totalLine);
+
+    const totalYams = state.boards.reduce((sum, board) => sum + countBoardYams(board), 0);
+    const yamsLine = document.createElement('p');
+    yamsLine.className = 'game-summary-line';
+    yamsLine.textContent = `Vous avez fait en tout ${totalYams} yams ! (hors carrés et brelans).`;
+    summaryContainer.appendChild(yamsLine);
+
+    const bonusCount = state.boards.reduce((sum, board) => {
+      const totals = totalsByBoard[board.id];
+      return sum + (totals.bonus > 0 ? 1 : 0);
+    }, 0);
+    const bonusLine = document.createElement('p');
+    bonusLine.className = 'game-summary-line';
+    bonusLine.textContent = `Vous avez obtenu ${bonusCount} bonus sur ${state.boards.length}.`;
+    summaryContainer.appendChild(bonusLine);
+
+    const boardList = document.createElement('div');
+    boardList.className = 'board-summary-list';
+    state.boards.forEach((board) => {
+      boardList.appendChild(createBoardSummaryCard(board, totalsByBoard[board.id]));
+    });
+    summaryContainer.appendChild(boardList);
   }
 
   function createEmptyState() {
@@ -506,7 +561,7 @@
       if (newName && newName.trim()) {
         board.name = newName.trim();
         saveState();
-        renderBoards();
+        render();
       }
     });
     block.appendChild(fullName);
@@ -607,7 +662,28 @@
     }
 
     cell.appendChild(container);
+    setYamIndicatorState(cell, !isCrossed && isYahtzeeValue(category, value));
     return cell;
+  }
+
+  function setYamIndicatorState(cell, isActive) {
+    if (!(cell instanceof HTMLElement)) {
+      return;
+    }
+    cell.classList.toggle('yam-cell', !!isActive);
+  }
+
+  function isYahtzeeValue(category, value) {
+    if (!category || value == null) {
+      return false;
+    }
+    if (category.id === 'yahtzee' && typeof category.fixedScore === 'number') {
+      return value === category.fixedScore;
+    }
+    if (typeof category.number === 'number') {
+      return value === category.number * 5;
+    }
+    return false;
   }
 
   function createTotalsDataRow(label, key, boards, totalsByBoard, isBonus = false) {
@@ -729,6 +805,19 @@
     }
   }
 
+  function updateYamIndicator(boardId, categoryId) {
+    const board = state.boards.find(b => b.id === boardId);
+    const category = CATEGORY_MAP[categoryId];
+    if (!board || !category) {
+      return;
+    }
+    const isCrossed = !!board.crossed?.[categoryId];
+    const value = board.entries[categoryId];
+    const selector = `.score-cell[data-board-id="${boardId}"][data-category-id="${categoryId}"]`;
+    const cell = boardsContainer.querySelector(selector);
+    setYamIndicatorState(cell, !isCrossed && isYahtzeeValue(category, value));
+  }
+
   function resetBoardEntries(board) {
     ALL_CATEGORIES.forEach((category) => {
       board.entries[category.id] = null;
@@ -771,6 +860,7 @@
         globalCell.textContent = globalTotal === 0 ? '' : String(globalTotal);
       }
     }
+    renderSummary();
   }
 
   function createDefaultState() {
@@ -896,5 +986,76 @@
     row.appendChild(totalCell);
 
     return row;
+  }
+
+  function createBoardSummaryCard(board, totals) {
+    const card = document.createElement('article');
+    card.className = 'board-summary-card';
+
+    const header = document.createElement('div');
+    header.className = 'board-summary-card-header';
+    const title = document.createElement('h3');
+    title.textContent = board.name;
+    const score = document.createElement('span');
+    score.className = 'board-summary-score';
+    score.textContent = `${totals.grand || 0} pts`;
+    header.appendChild(title);
+    header.appendChild(score);
+    card.appendChild(header);
+
+    const appreciation = getScoreAppreciation(totals.grand || 0, 1);
+    const appreciationLine = document.createElement('p');
+    appreciationLine.className = `board-summary-appreciation ${appreciation.className}`;
+    appreciationLine.textContent = `${formatAppreciationLabel(appreciation.label)} score`;
+    card.appendChild(appreciationLine);
+
+    const yamsLine = document.createElement('p');
+    yamsLine.className = 'board-summary-meta';
+    yamsLine.textContent = `Yams détectés : ${countBoardYams(board)}`;
+    card.appendChild(yamsLine);
+
+    const bonusLine = document.createElement('p');
+    bonusLine.className = 'board-summary-meta';
+    bonusLine.textContent = totals.bonus > 0 ? 'Bonus obtenu' : 'Sans bonus';
+    card.appendChild(bonusLine);
+
+    return card;
+  }
+
+  function countBoardYams(board) {
+    const crossedMap = board.crossed ?? {};
+    return ALL_CATEGORIES.reduce((total, category) => {
+      if (crossedMap[category.id]) {
+        return total;
+      }
+      const value = board.entries[category.id];
+      return total + (isYahtzeeValue(category, value) ? 1 : 0);
+    }, 0);
+  }
+
+  function isBoardComplete(board) {
+    const crossedMap = board.crossed ?? {};
+    return ALL_CATEGORIES.every((category) => board.entries[category.id] != null || crossedMap[category.id]);
+  }
+
+  function getScoreAppreciation(score, boardCount = 1) {
+    const average = boardCount > 0 ? score / boardCount : score;
+    if (average >= 320) {
+      return { label: 'très beau', className: 'score-tier-excellent' };
+    }
+    if (average >= 260) {
+      return { label: 'beau', className: 'score-tier-good' };
+    }
+    if (average >= 200) {
+      return { label: 'moyen', className: 'score-tier-average' };
+    }
+    return { label: 'mauvais', className: 'score-tier-poor' };
+  }
+
+  function formatAppreciationLabel(label) {
+    if (!label) {
+      return '';
+    }
+    return label.charAt(0).toUpperCase() + label.slice(1);
   }
 })();

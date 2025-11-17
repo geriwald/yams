@@ -309,6 +309,85 @@ body {
   overflow: auto;
 }
 
+.game-summary {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: var(--shadow);
+}
+
+.game-summary h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.game-summary-line {
+  margin: 4px 0;
+  color: var(--text-muted);
+}
+
+.board-summary-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.board-summary-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--bg-card);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.board-summary-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.board-summary-card h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.board-summary-score {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.board-summary-appreciation {
+  margin: 4px 0;
+  font-size: 0.85rem;
+}
+
+.board-summary-meta {
+  margin: 2px 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.score-tier-excellent {
+  color: #059669;
+}
+
+.score-tier-good {
+  color: #2563eb;
+}
+
+.score-tier-average {
+  color: #d97706;
+}
+
+.score-tier-poor {
+  color: #dc2626;
+}
+
 .score-grid {
   min-width: max(400px, 100%);
   overflow-x: auto;
@@ -483,6 +562,9 @@ body {
   cursor: text;
 }
 
+.score-cell.yam-cell {
+  box-shadow: inset 0 0 0 2px rgba(249, 168, 212, 0.45);
+}
 body.cross-mode-active .score-cell,
 body.cross-mode-active .score-cell .score-input,
 body.cross-mode-active .score-cell .score-fixed-toggle {
