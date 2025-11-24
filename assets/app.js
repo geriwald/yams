@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = 'v3.4';
+  const APP_VERSION = 'v3.5';
 
   const UPPER_CATEGORIES = [
     { id: 'ones', label: 'As', hint: 'Total des dés à 1', number: 1 },
